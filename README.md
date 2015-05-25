@@ -15,7 +15,7 @@ Note. The product "Building" lists all envirounments and workstations that belon
 * select AutoBuilds folder that will be called ${autobuilds.dir}
 * chechout https://github.com/jcde/CCNetConfiguration/trunk into ${autobuilds.dir}\CCNetConfiguration folder (called ${config.dir})
 * get _environment_.xml from someone or make it by yourselves and put it in ${config.dir}
-* run ${config.dir}\setCurrentDeploy.vbs <environment>.xml and logoff/logon
+* run ${config.dir}\setCurrentDeploy.vbs _environment_.xml and logoff/logon
 * maybe modify and maybe run ${config.dir}\setPath.bat
 ** for example, svn.exe must be accessible in command line by PATH, its binaries are in "c:\Program Files\Apache Software Foundation\Apache2.2\bin\.." 
 * run ${config.dir}\CCNet\CCNet2Environment.build.bat
