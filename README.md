@@ -10,6 +10,7 @@ Note. The product "Building" lists all envirounments and workstations that belon
 * Nant 0.92
 * CruiseControl.NET-1.8.5.0-Setup.exe gives only web-site
 * http://switch.dl.sourceforge.net/project/gnuwin32/zip/3.0/zip-3.0-setup.exe
+
 = Environment installation =
 * select AutoBuilds folder that will be called ${autobuilds.dir}
 * chechout https://github.com/jcde/CCNetConfiguration/trunk into ${autobuilds.dir}\CCNetConfiguration folder
