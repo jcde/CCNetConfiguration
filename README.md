@@ -8,12 +8,13 @@ Note. The product "Building" lists all envirounments and workstations that belon
 
 = Prerequisites =
 * Nant 0.92
+* TortoiseSVN
 * CruiseControl.NET-1.8.5.0-Setup.exe gives only web-site
 * http://switch.dl.sourceforge.net/project/gnuwin32/zip/3.0/zip-3.0-setup.exe
 
 = Environment installation =
-* select AutoBuilds folder that will be called ${autobuilds.dir}
-* chechout https://github.com/jcde/CCNetConfiguration/trunk into ${autobuilds.dir}\CCNetConfiguration folder (called ${config.dir})
+* select AutoBuilds folder to store scripts that will be called ${autobuilds.dir}
+* checkout https://github.com/jcde/CCNetConfiguration/trunk into ${autobuilds.dir}\CCNetConfiguration folder (called ${config.dir}) by TortoiseSVN
 * get _environment_.xml from someone or make it by yourselves and put it in ${config.dir}
 * run ${config.dir}\setCurrentDeploy.vbs _environment_.xml and logoff/logon
 * maybe modify and maybe run ${config.dir}\setPath.bat
