@@ -3,7 +3,7 @@
 
   <include buildfile="${environment::get-variable('currentDeploy')}" />
 
-  <property name="ccnet.dir" value="${sources.dir}\Configuration\DeployEnvironments\CCNet" /> 
+  <property name="ccnet.dir" value="${config.dir}\CCNet" /> 
   <property name="ccnet.mainconfig.dir" value="${ccnet.dir}\ccnet.configs" /> 
   <property name="ccnet.binIni.dir" value="${ccnet.mainconfig.dir}\bin" /> 
   <property name="ccnet.config.dir" value="${ccnet.mainconfig.dir}\${currentDeploy}" /> 
@@ -16,11 +16,11 @@
 			<include name="*" />
 		</fileset>
 	</copy>
-	<copy todir="${ccnet.config.dir}\images">
+	<!--copy todir="${ccnet.config.dir}\images" >
 		<fileset basedir="${ccnet.binIni.dir}\images">
 			<include name="*" />
 		</fileset>
-	</copy>
+	</copy-->
   <property name="_good" value="0" />     
   <copy tofile="${ccnet.config}" file="${ccnet.mainconfig.dir}\ccnet.config" />
   <xmlpeek property="result" file="${ccnet.mainconfig.dir}\ccnet.config" xpath="/cruisecontrol" /> 
@@ -61,18 +61,21 @@
 				<property name="workingDirectory" value="${AutoProduct.dir.dynamic}" /> 
 				<mkdir dir="${workingDirectory}" />
 
+				<property name="sourceType" value="svn" />
+				<property name="sscpart" value="&lt;trunkUrl&gt;${trunkUrl}&lt;/trunkUrl&gt;" dynamic="true" />
 				<property name="AutoProduct.SVNdir" value="" dynamic="true" />
-        <property name="username" value="${SVNusername}" dynamic="true" />
-        <property name="password" value="${SVNpassword}" dynamic="true" />
+				<property name="_username" value="${username}" dynamic="true" />
+				<property name="_password" value="${password}" dynamic="true" />
 				<xmlpeek property="AutoProduct.SVNdir" file="${Products.xml}" failonerror="false"
 					xpath="/products/product/version[../@name='${AutoProduct.name}'][auto/@deploy='${currentDeploy}']/@SVNdir" /> 
 				<if test="${string::get-length(AutoProduct.SVNdir) > 0}" >
 					<property name="trunkUrl" value="${AutoProduct.SVNdir}" /> 
-					<xmlpeek property="username" file="${Products.xml}" failonerror="false"
+					<xmlpeek property="_username" file="${Products.xml}" failonerror="false"
 						xpath="/products/product/version[../@name='${AutoProduct.name}'][auto/@deploy='${currentDeploy}']/@username" /> 
-					<xmlpeek property="password" file="${Products.xml}" failonerror="false"
+					<xmlpeek property="_password" file="${Products.xml}" failonerror="false"
 						xpath="/products/product/version[../@name='${AutoProduct.name}'][auto/@deploy='${currentDeploy}']/@password" /> 
 				</if>
+
 				<xmlpeek property="AutoProduct.SVNdir" file="${Products.xml}" failonerror="false"
 					xpath="/products/product/version[../@name='${AutoProduct.name}']/auto[@deploy='${currentDeploy}']/@SVNdir" /> 
 				<if test="${string::get-length(AutoProduct.SVNdir) > 0}" >
@@ -80,15 +83,25 @@
 					<property name="trunkUrl" value="${AutoProduct.SVNdir}" /> 
 				</if>
 				<ifnot test="${string::get-length(AutoProduct.SVNdir) > 0}" >
-					<property name="username" value="${SVNusername}" failonerror="false" /> 
-					<property name="password" value="${SVNpassword}" failonerror="false" /> 
+					<property name="_username" value="${username}" failonerror="false" /> 
+					<property name="_password" value="${password}" failonerror="false" /> 
 
-					<property name="autobuilds.dirD" value="${autobuilds.dir}" /> 
-					<if test="${string::ends-with(autobuilds.dir,':\')}" >
-						<property name="trunkUrl" value="${string::replace(string::replace(AutoProduct.dir.dynamic,sources.dir,autobuilds.SVNdir+'/Sources'),'\','/')}" /> 
+					<property name="AutoProduct.TFSdir" value="" />
+					<xmlpeek property="AutoProduct.TFSdir" file="${Products.xml}" failonerror="false"
+						xpath="/products/product/version[../@name='${AutoProduct.name}'][auto/@deploy='${currentDeploy}']/@TFSdir" /> 
+					<if test="${string::get-length(AutoProduct.TFSdir) > 0}" >
+						<property name="sscpart" value="&lt;server&gt;${TFSserver}&lt;/server&gt;&lt;project&gt;${AutoProduct.TFSdir}&lt;/project&gt;&lt;domain&gt;${domain}&lt;/domain&gt;&lt;workspace&gt;CCNET&lt;/workspace&gt;" />
+						<property name="sourceType" value="vsts" />
+						<echo>!!!!TFSpart${sscpart}</echo>
 					</if>
-					<ifnot test="${string::ends-with(autobuilds.dir,':\')}" >
-						<property name="trunkUrl" value="${string::replace(string::replace(AutoProduct.dir.dynamic,autobuilds.dir,autobuilds.SVNdir),'\','/')}" /> 
+					<ifnot test="${string::get-length(AutoProduct.TFSdir) > 0}" >
+						<property name="autobuilds.dirD" value="${autobuilds.dir}" /> 
+						<if test="${string::ends-with(autobuilds.dir,':\')}" >
+							<property name="trunkUrl" value="${string::replace(string::replace(AutoProduct.dir.dynamic,sources.dir,autobuilds.SVNdir+'/Sources'),'\','/')}" /> 
+						</if>
+						<ifnot test="${string::ends-with(autobuilds.dir,':\')}" >
+							<property name="trunkUrl" value="${string::replace(string::replace(AutoProduct.dir.dynamic,autobuilds.dir,autobuilds.SVNdir),'\','/')}" /> 
+						</ifnot>
 					</ifnot>
 				</ifnot>
 				
@@ -96,7 +109,7 @@
 				<xmlpeek property="prSet" file="${Products.xml}" failonerror="false"
 					xpath="/products/product/version[@dir='${AutoProduct.dir}']/auto[@deploy='${currentDeploy}']/@productSet" />
           
-        <!-- file exists checking works on local files but must look into reposisaty -->   
+				<!-- file exists checking works on local files but must look into reposisaty -->   
 				<if test="${string::get-length(prSet) > 0}" >
 					<property name="buildFile" value="${AutoProduct.dir.dynamic}\${AutoProduct.name}.${prSet}.build" /> 
 					<ifnot test="${file::exists(buildFile)}" >
@@ -109,7 +122,7 @@
 								value="${AutoProduct.dir.dynamic}\${AutoProduct.name}.build" /> 
 				</ifnot>
         
-        <property name="targetList" value="" /> 
+				<property name="targetList" value="" /> 
 				<xmlpeek property="targetList" file="${Products.xml}" failonerror="false"
 					xpath="/products/product/version[../@name='${AutoProduct.name}']/auto[@deploy='${currentDeploy}']/targetList" /> 
 
@@ -130,9 +143,9 @@
      		<property name="xsltSuffix" value="" /> 
    			<xmlpeek property="xsltSuffix" file="${Products.xml}" failonerror="false"
       				xpath="/products/product/version[../@name='${AutoProduct.name}']/auto[@deploy='${currentDeploy}']/@xsltSuffix" /> 
-				<property name="template" dynamic="true" value="" />
-				<xmlpeek property="template" file="${ccnet.dir}\Product2CCNet${xsltSuffix}.xslt" xpath="/template" verbose="true" />
-				<property name="result" value="${template}" />
+			<property name="template" dynamic="true" value="" />
+			<xmlpeek property="template" file="${ccnet.dir}\Product2CCNet${xsltSuffix}.xslt" xpath="/template" verbose="true" />
+			<property name="result" value="${template}" />
 			<!--/ifnot-->
     </foreach>
     

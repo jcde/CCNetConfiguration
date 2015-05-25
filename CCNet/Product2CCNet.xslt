@@ -4,19 +4,21 @@
   <project>
 		<name>${AutoProduct.name}</name> 
 		${projccnetConfigPart}
-    <!--security type="defaultProjectSecurity" guest="guest" >
-      <permissions>     
-    		${projccnetPerm}
-        ${ccnetPerm}
-      </permissions>
-    </security-->     
-      <webURL>http://ro/ccnet/server/${environment::get-machine-name()}/project/${AutoProduct.name}/ViewLatestBuildReport.aspx</webURL>
-		  <sourcecontrol type="svn" >
+		<!--security type="defaultProjectSecurity" guest="guest" >
+		  <permissions>     
+			${projccnetPerm}
+			${ccnetPerm}
+		  </permissions>
+		</security-->     
+		<webURL>http://router/ccnet/server/${environment::get-machine-name()}/project/${AutoProduct.name}/ViewLatestBuildReport.aspx</webURL>
+		<!--sourcecontrol autoGetSource="true" applyLabel="true"-->
+ 	    <sourcecontrol type="${sourceType}" autoGetSource="true" >
 			<executable>${svn.exe}</executable>
-			<trunkUrl>${trunkUrl}</trunkUrl>
-			<username>${username}</username>
-			<password>${password}</password>
+			${sscpart}
+			<username>${_username}</username>
+			<password>${_password}</password>
 			<workingDirectory>${workingDirectory}</workingDirectory>
+			<cleanCopy>false</cleanCopy>
 		</sourcecontrol>
 		<tasks>
 			<nant>

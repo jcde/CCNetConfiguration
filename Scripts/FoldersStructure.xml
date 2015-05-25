@@ -2,7 +2,6 @@
 <project>
   <!-- propetries here till target (and web.config) may be overriden in specific project -->
 	<property name="currentDeploy" value="${path::get-file-name-without-extension( environment::get-variable('currentDeploy') )}" />
-	<property name="autobuilds.dir" value="${ path::get-directory-name(path::get-directory-name(path::get-directory-name(path::get-directory-name(environment::get-variable('currentDeploy')	)))) }" />
 	<property name="root.dir" value="${ path::get-directory-name(path::get-directory-name(path::get-directory-name(path::get-directory-name(environment::get-variable('currentDeploy')	)))) }" />
  	<property name="programs86" value="${environment::get-variable('ProgramFiles')}" />
   <if test="${environment::get-variable('PROCESSOR_ARCHITECTURE')!='x86'}" >
@@ -11,13 +10,14 @@
 	<property name="svn.exe" value="svn" /> <!--${environment::get-folder-path('ProgramFiles')}\Subversion\bin\svn.exe" /-->
 
  	<property name="sources.dir" value="${ path::get-directory-name(path::get-directory-name(path::get-directory-name(environment::get-variable('currentDeploy')	))) }" />
-	<property name="config.dir"  value="${sources.dir}\Configuration" />
-	<property name="scripts.dir" value="${config.dir}\DeployEnvironments\Scripts" /> 
+	<property name="autobuilds.dir"  value="${sources.dir}\AutoBuilds" />
+	<property name="config.dir"  value="${autobuilds.dir}\CCNetConfiguration" />
+	<property name="scripts.dir" value="${config.dir}\Scripts" /> 
 	<property name="proj.dir" value="${sources.dir}\Projects" />
 	<property name="core.dir"  value="${proj.dir}\Core" />
 	<property name="core.framework.dir"  value="${sources.dir}\Framework" />
 	<!--property name="core.framework.dir"  value="${ string::substring(core.dir, 0, string::last-index-of(core.dir, '\')) }\Framework" /-->
-	<property name="Products.xml" value="${config.dir}\Products.xml" />
+	<property name="Products.xml" value="${autobuilds.dir}\Products.xml" />
 
 	<property name="build.file" value="${path::get-file-name( project::get-buildfile-uri() )}" />
 
@@ -61,8 +61,8 @@
 		<property name="productDirRegistered" dynamic="True" value="" />
 		<xmlpeek property="productDirRegistered" file="${Products.xml}" failonerror="false"
 			xpath="/products/product[@name='${product.name}']/version[@major='${product.version.major}'][@minor='${product.version.minor}']/@dir" />
-
-		<if test="${string::to-lower(productDirRegistered) != string::to-lower(product.dir)}" > 
+  
+  		<if test="${string::to-lower(productDirRegistered) != string::to-lower(product.dir)}" > 
 			<fail message="Update version or product dir in '${Products.xml}' to ${product.dir}. ${productDirRegistered} is wrong." />
 		</if>
     
