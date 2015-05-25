@@ -1,0 +1,310 @@
+<?xml version="1.0"?>
+<project>
+  <property name="zipPassword" value="" />
+
+  <target name="dbInit" depends="installinit" >
+    <property name="dbs.dir" value="${product.config.dir}\Databases" />
+    <xmllist property="dbs" file="${currentVersion.xml}" xpath="/product/databases/database/@name" /> 
+		<foreach item="String" delim="," in="${dbs}" property="prName">    
+			<property name="dest" value="" />
+			<xmlpeek file="${install.log}" xpath="/product/configurationChanges/database[@name='${prName}']/@state" 
+				property="dest" failonerror="False" />
+			<if test="${ string::get-length(dest) == 0 }">
+				<xmlpeek file="${install.log}" xpath="/product/configurationChanges" property="result" />
+				<xmlpoke file="${install.log}" xpath="/product/configurationChanges" 
+					value="${result}&lt;database name='${prName}' state='None' /&gt;" />
+			</if>
+		</foreach>
+
+    <property name="db.version" value="${product.version.major}.${product.version.minor}.${product.version.build}" />
+  </target>
+
+  <target name="dbCreate" >
+    <call target="dbInit" />
+    <foreach item="String" delim="," in="${dbs}" property="prName">    
+			<xmlpeek file="${install.log}" xpath="/product/configurationChanges/database[@name='${prName}']/@state" 
+				property="state" />
+		  <echo>State - ${state}</echo>
+      <if test="${state=='None' or string::get-length('state')==-1}">
+		      <echo>Database ${prName}</echo>
+    		  <call target="connstrIntoOLEDB" cascade="false" />
+          <sql if="${datype=='Sql'}" connstring="${string::replace(connstr,initialCatalog,'master')}" 
+               delimiter=";" delimstyle="Normal" >
+            CREATE DATABASE ${initialCatalog}
+          </sql>
+          <copy if="${datype=='Access'}" file="${config.dir}\Database\AccessSecurityEmpty.mdb" 
+            tofile="${dataSource}" />
+
+          <xmlpoke file="${install.log}" xpath="/product/configurationChanges/database[@name='${prName}']/@state" 
+            value="Empty" />
+       </if>
+    </foreach>
+  </target>
+
+  <target name="dbScriptsCreate" depends="dbInit" if="${file::exists(web.config)}" >
+    <call target="build" if="${target::exists('CompileStrings') and not target::has-executed('CompileStrings')}" /><!--target build is being executed now :(-->-->
+    
+    <foreach item="String" delim="," in="${dbs}" property="prName">    
+		  <xmlpeek file="${install.log}" xpath="/product/configurationChanges/database[@name='${prName}']/@name" 
+			  property="state" />
+
+      <call target="connstrIntoOLEDB" cascade="false" />
+
+      <mkdir dir="${dbs.dir}\${prName}\CreateScripts\${datype}" />
+
+      <xmllist property="tablesNamePrefix" file="${currentVersion.xml}" 
+               xpath="/product/databases/database[@name='${prName}']/@tablesNamePrefix" />
+
+      <exec program="${config.dir}\bin\Release\EDM.SPGenerator.exe"
+			  commandline='-t:"${dbs.dir}\${prName}\CreateScripts\${datype}\CreateDBScript.sql" 
+                     -dll:"${output.dir}" -tablesNamePrefix:${tablesNamePrefix} -dt:${datype}' />
+
+      <copy file="${config.dir}\bin\Release\NumSite.DBCreateScript.exe" todir="${output.dir}" />
+      <copy file="${dbs.dir}\NumSite.DBCreateScript.exe.config" todir="${output.dir}" />
+      <exec program="${output.dir}\NumSite.DBCreateScript.exe"
+            commandline='-t:"${dbs.dir}\${prName}\CreateScripts" ' />
+      <exec program="${output.dir}\NumSite.DBCreateScript.exe"
+            commandline='-t:"${dbs.dir}\${prName}\CreateScripts" -noTables -r' />
+    </foreach>
+  </target>
+
+  <target name="dbApplyCreateScripts" >
+    <call target="dbInit" />
+    <foreach item="String" delim="," in="${dbs}" property="prName"> 
+          <call target="connstrIntoOLEDB" cascade="false" />
+
+          <foreach item="File" in="${dbs.dir}\${prName}\CreateScripts\${datype}" property="fileName">
+            <echo>${fileName}</echo>
+            <sql connstring="${connstr}" delimstyle="Line" if="${'MSCE' != datype}"
+			delimiter="" source="${fileName}" />
+
+            <sql connstring="${connstr}" delimstyle="Line" if="${'MSCE' == datype}"
+	            batch="false" delimiter="GO" source="${fileName}" />
+		 <!-- batch="false" delimiter="GO" only for MS CE -->
+          </foreach>
+
+          <xmlpoke file="${install.log}" xpath="/product/configurationChanges/database[@name='${prName}']/@state" 
+				  value="AppliedCreateScripts" />
+	  </foreach>
+  </target>
+
+  <target name="dbApplyAlterScripts" >
+    <call target="dbInit" />
+    <foreach item="String" delim="," in="${dbs}" property="prName"> 
+    		  <call target="connstrIntoOLEDB" cascade="false" />
+
+      <!-- !!!!! -->
+   	  	  <sql connstring="${connstr}" delimiter="" delimstyle="Line" 
+   				  source="${dbs.dir}\${prName}\CreateScripts\${datype}\Data.sql" />
+
+          <xmlpoke file="${install.log}" xpath="/product/configurationChanges/database[@name='${prName}']/@state" 
+				    value="AppliedAlterScripts" />
+	  </foreach>
+  </target>
+  
+
+  <target name="dbBackup" >
+    <call target="dbInit" />
+    
+    <xmllist property="dbs" file="${currentVersion.xml}" xpath="/product/databases/database/@name" />
+    <foreach item="String" delim="," in="${dbs}" property="prName">
+      <call target="connstrIntoOLEDB" cascade="false" />
+
+      <property name="backup.path" value="${backup.dir}\${product.name}_${prName}.bak" />
+      <if test="${'Sql' == datype}">
+        <!-- WITH INIT for first backup -->
+        <sql connstring="${connstr}" delimiter=";" delimstyle="Normal" if="${file::exists(backup.path)}" >
+          BACKUP DATABASE ${initialCatalog}
+          TO DISK = '${backup.path}'
+          WITH DIFFERENTIAL
+        </sql>
+        <sql connstring="${connstr}" delimiter=";" delimstyle="Normal" unless="${file::exists(backup.path)}" >
+          BACKUP DATABASE ${initialCatalog}
+          TO DISK = '${backup.path}'
+          WITH INIT
+        </sql>
+
+        <if test="${file::get-length(backup.path) &lt; 1000000000}">
+          <zip zipfile="${backup.dir}\${product.name}_${prName}_${year+month+day}.zip"
+            stampdatetime="${datetime::now()}" >
+            <fileset basedir="${backup.dir}" >
+              <include name="${product.name}_${prName}.bak" />
+            </fileset>
+          </zip>
+          <!--to determine differential or init delete file="${backup.path}" /-->
+        </if>
+      </if>
+
+      <if test="${'MySql' == datype}">
+        <call target="mysqlBackup" />
+      </if>
+
+      <zip if="${'File' == datype}"
+        zipfile="${backup.dir}\${product.name}_${prName}_${year+month+day}.zip"
+        stampdatetime="${datetime::now()}" >
+        <fileset basedir="${connstr}" >
+          <include name="*.*" />
+        </fileset>
+      </zip>
+    </foreach>
+  </target>
+
+  <target name="dbRestore" >
+    <call target="dbInit" />
+
+    <xmllist property="dbs" file="${currentVersion.xml}" xpath="/product/databases/database/@name" />
+    <foreach item="String" delim="," in="${dbs}" property="prName">
+      <call target="connstrIntoOLEDB" cascade="false" />
+
+      <sql connstring="${connstr}" delimiter=";" delimstyle="Normal" >
+        RESTORE FILELISTONLY
+        FROM DISK = '${backup.dir}\test.bak'
+
+        RESTORE DATABASE ${initialCatalog}back
+        FROM DISK = '${backup.dir}\test.bak'
+        WITH MOVE 'ReqPro' TO '${backup.dir}\testdb.mdf',
+             MOVE 'ReqPro_Log' TO '${backup.dir}\testdb.ldf'
+      </sql>
+    </foreach>
+  </target>
+
+  <target name="mysqlBackup" >
+     <mkdir dir="${backup.dir}\${product.name}" />
+		 <property name="backupFile" value="${backup.dir}\${product.name}\${initialCatalog}_${year+month+day}" />
+     <exec program="${scripts.dir}\mysqlDump.bat" timeout="1800000" > 
+              <arg value="${initialCatalog}" />
+              <arg value="${gzip.exe}" />
+              <arg value="${backupFile}_mysql.zip" />
+              <arg value="${dataSource}" />
+              <arg value="${userId}" />
+              <arg value="${pass}" />
+              <arg value="${zipPassword}" />
+     </exec>
+  </target>
+
+  <target name="wikiBackup" >
+      <property name="settingsFile" value="${product.dir}\LocalSettings.php" />
+      <loadfile file="${settingsFile}" property="settings" />
+		  <property name="fromIndex" value="${string::index-of(settings, '$wgDBserver         = ')+23}" />
+      <property name="dataSource" value="${string::substring(settings, fromIndex, 100)}" />
+		  <property name="toIndex" value="${string::index-of(dataSource, ';')-1}" />
+      <property name="dataSource" value="${string::substring(dataSource, 0, toIndex)}" />
+
+      <loadfile file="${settingsFile}" property="settings" />
+		  <property name="fromIndex" value="${string::index-of(settings, '$wgDBname           = ')+23}" />
+      <property name="initialCatalog" value="${string::substring(settings, fromIndex, 100)}" />
+		  <property name="toIndex" value="${string::index-of(initialCatalog, ';')-1}" />
+      <property name="initialCatalog" value="${string::substring(initialCatalog, 0, toIndex)}" />
+
+      <loadfile file="${settingsFile}" property="settings" />
+		  <property name="fromIndex" value="${string::index-of(settings, '$wgDBuser           = ')+23}" />
+      <property name="userId" value="${string::substring(settings, fromIndex, 100)}" />
+		  <property name="toIndex" value="${string::index-of(userId, ';')-1}" />
+      <property name="userId" value="${string::substring(userId, 0, toIndex)}" />
+
+      <loadfile file="${settingsFile}" property="settings" />
+		  <property name="fromIndex" value="${string::index-of(settings, '$wgDBpassword       = ')+23}" />
+      <property name="pass" value="${string::substring(settings, fromIndex, 100)}" />
+		  <property name="toIndex" value="${string::index-of(pass, ';')-1}" />
+      <property name="pass" value="${string::substring(pass, 0, toIndex)}" />
+	  
+	  <call target="mysqlBackup" />
+  </target>
+
+
+  <target name="wikiBackupOnGmail" depends="wikiBackup" >
+      <mail
+        from="robot@christian.in.ua"
+        tolist="christorage1@gmail.com"
+        subject="${product.name}: ${path::get-file-name(backupFile)}"
+        mailhost="smtp.gmail.com"
+        mailport="587"
+        ssl="true"
+        user="yevhen.balun@gmail.com"
+        password="testtest123"
+      >
+        <attachments>
+          <include name="${backupFile}_mysql.zip" />
+        </attachments>
+      </mail>
+      <!-- email was sent anynch delete file="${backupFile}_mysql.zip" /-->
+  </target>
+
+  <target name="wikiBackupWithImages" depends="wikiBackup" >
+      <!-- target name="mysqlBackup" set <property name="backupFile" -->
+      <property name="imagesDir" value="${product.dir}\images" />
+      <zip zipfile="${backupFile}_images.zip" stampdatetime="${datetime::now()}" >
+        <fileset basedir="${imagesDir}" >
+          <include name="**" />
+        </fileset>
+      </zip>
+  </target>
+
+  <!-- input properties 'prName' -->
+  <!-- output properties 'connstr', 'datype' -->
+  <target name="connstrIntoOLEDB" depends="dbInit" >
+
+      <xmlpeek file="${web.config}" xpath="/configuration/appSettings/add[@key='${prName}DAType']/@value"
+      property="datype" failonerror="False" if="${not(property::exists('datype'))}" />
+
+      <xmlpeek file="${web.config}" 
+      xpath="/configuration/applicationSettings/NumSite.DAL.Properties.Settings/setting[@name='${prName}DAType']/value"
+      property="datype" failonerror="False" if="${not(property::exists('datype'))}" />
+    
+      <trycatch>
+        <try>
+              <xmlpeek file="${web.config}" xpath="/configuration/appSettings/add[@key='${prName}ConnStr${datype}']/@value"
+              property="connstr" />
+        </try>
+        <catch>
+          <xmlpeek file="${web.config}" property="datype" if="${not(property::exists('datype'))}"
+                   xpath="/configuration/connectionStrings/add[contains(@name, '${prName}ConnStr')][@providerName!='']/@providerName" />
+          <property name="datype" value="Sql" if="${datype=='System.Data.SqlClient'}" />
+          <xmlpeek file="${web.config}" property="connstr" failonerror="False"
+                   xpath="/configuration/connectionStrings/add[contains(@name, '${prName}ConnStr${datype}')]/@connectionString" />
+          <xmlpeek file="${web.config}" property="connstr" if="${not(property::exists('connstr'))}"
+                   xpath="/configuration/connectionStrings/add[contains(@name, '${prName}ConnStr')]/@connectionString" />
+        </catch>
+      </trycatch>
+      
+
+
+
+    <property name="pass" value="" />
+    <property name="dataSource" value="" />     <!-- may be null for File  -->
+    <property name="initialCatalog" value="" /> <!-- may be null for Access -->
+    <foreach item="String" delim=";" in="${connstr}" property="subS">
+      <property name="dataSource"
+                value="${string::substring(subS, 12, string::get-length(subS)-12)}"
+                if="${string::index-of(string::to-lower(subS), 'data source=')!=-1}" />
+      <property name="dataSource"
+                value="${string::substring(subS, 7, string::get-length(subS)-7)}"
+                if="${string::index-of(string::to-lower(subS), 'server=')!=-1}" />
+      <property name="dataSource"
+                value="."
+                if="${dataSource=='localhost'}" /><!--strange behavoir of OLEDB-->
+
+      <property name="initialCatalog"
+                value="${string::substring(subS, 16, string::get-length(subS)-16)}"
+                if="${string::index-of(string::to-lower(subS), 'initial catalog=')!=-1}" />
+      <property name="initialCatalog"
+                value="${string::substring(subS, 9, string::get-length(subS)-9)}"
+                if="${string::index-of(string::to-lower(subS), 'database=')!=-1}" />
+      
+      <property name="userId"
+                value="${string::substring(subS, 8, string::get-length(subS)-8)}"
+                if="${string::index-of(string::to-lower(subS), 'user id=')!=-1}" />
+      <property name="pass"
+                value="${string::substring(subS, 9, string::get-length(subS)-9)}" 
+                if="${string::index-of(string::to-lower(subS), 'password=')!=-1}" />
+    </foreach>
+    <property name="connstr" if="${datype=='Sql' and property::exists('userId') }"
+              value="Provider=SQLOLEDB.1;Initial Catalog=${initialCatalog};Data Source=${dataSource};user id=${userId};password=${pass};" />
+    <property name="connstr" if="${datype=='Sql' and not(property::exists('userId')) }"
+              value="Provider=SQLOLEDB.1;Initial Catalog=${initialCatalog};Data Source=${dataSource};Integrated Security=SSPI;" />
+              
+              
+    <echo>Data Source ${dataSource}, Initial Catalog ${initialCatalog}</echo>
+  </target>
+
+</project>

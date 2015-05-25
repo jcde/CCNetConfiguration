@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<project default="CCNetStart">
+
+  <include buildfile="CCNet2Environment.build" />
+
+  <property name="ccnet.bin.dir" value="${ccnet.config.dir}" />
+
+  <target name="CCNetBinInit" >
+	<copy todir="${ccnet.bin.dir}">
+		<fileset basedir="${ccnet.mainconfig.dir}\bin">
+			<include name="*" />
+		</fileset>
+	</copy>
+
+	<xmlpeek property="adds" file="${ccnet.bin.dir}\ccservice.exe.config" xpath="/configuration/appSettings" />
+	<xmlpoke file="${ccnet.bin.dir}\ccservice.exe.config" if="${string::index-of(adds,'service.name')==-1}"
+		value="${adds} &lt;add key='service.name' value='CCService ${currentDeploy}' /&gt;" xpath="/configuration/appSettings" />
+
+	<xmlpeek property="adds" file="${ccnet.bin.dir}\ccservice.exe.config" failonerror="false"
+		xpath="/configuration/system.runtime.remoting/application/channels" />
+	<xmlpoke file="${ccnet.bin.dir}\ccservice.exe.config" if="${string::index-of(adds,'channel')==-1}"
+		value="${adds} &lt;channel ref='tcp' port='${ccPort}' &gt;
+					&lt;serverProviders&gt;
+						&lt;formatter ref='binary' typeFilterLevel='Full' /&gt;
+					&lt;/serverProviders&gt;
+				&lt;/channel&gt;" 
+		xpath="/configuration/system.runtime.remoting/application/channels" />
+
+
+	<xmlpeek property="adds" file="${ccnet.bin.dir}\ccnet.exe.config" failonerror="false"
+		xpath="/configuration/system.runtime.remoting/application/channels" />
+	<xmlpoke file="${ccnet.bin.dir}\ccnet.exe.config" if="${string::index-of(adds,'channel')==-1}"
+		value="${adds} &lt;channel ref='tcp' port='${ccPort}' &gt;
+					&lt;serverProviders&gt;
+						&lt;formatter ref='binary' typeFilterLevel='Full' /&gt;
+					&lt;/serverProviders&gt;
+				&lt;/channel&gt;" 
+		xpath="/configuration/system.runtime.remoting/application/channels" />
+  </target>
+
+  <target name="CCNetStart" depends="CCNetBinInit" >
+	<exec program="${ccnet.bin.dir}\ccnet.exe" workingdir="${ccnet.config.dir}" />
+  </target>
+
+</project>

@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<project name="" default="mkAssembly">
+
+	<target name="incMajor" depends="init" >
+		<xmlpoke file="${currentVersion.xml}" xpath="/product/@major"
+			 value="${int::parse(product.version.major)+1}" />
+		<xmlpoke file="${currentVersion.xml}" xpath="/product/@minor"
+			 value="0" />
+		<xmlpoke file="${currentVersion.xml}" xpath="/product/@build"
+			 value="0" />
+		<xmlpoke value="0" file="${Products.xml}" 
+			xpath="/products/product[@name='${product.name}']/version[@major='${product.version.major}'][@minor='${product.version.minor}']/@minor" />
+		<xmlpoke value="${int::parse(product.version.major)+1}" file="${Products.xml}" 
+			xpath="/products/product[@name='${product.name}']/version[@major='${product.version.major}'][@minor='0']/@major" />
+
+
+		<call target="mkAssemInfo" />
+	</target>
+
+	<target name="incMinor" depends="init" >
+		<xmlpoke file="${currentVersion.xml}" xpath="/product/@minor"
+			 value="${int::parse(product.version.minor)+1}" />
+		<xmlpoke file="${currentVersion.xml}" xpath="/product/@build"
+			 value="0" />
+		<xmlpoke value="${int::parse(product.version.minor)+1}" file="${Products.xml}" 
+			xpath="/products/product[@name='${product.name}']/version[@major='${product.version.major}'][@minor='${product.version.minor}']/@minor" />
+
+		<call target="mkAssemInfo" />
+	</target>
+
+	<target name="incBuild" depends="init" >
+		<xmlpoke file="${currentVersion.xml}" xpath="/product/@build"
+			  value="${int::parse(product.version.build)+1}" />	
+
+		<call target="mkAssemInfo" />
+	</target>
+
+	<target name="mkAssemInfo" depends="init" >
+		<asminfo output="ProductAssemblyInfo.cs" language="CSharp">
+		<imports>
+    		    <import name="System.Reflection" />
+    		</imports>
+    		<attributes>
+			<attribute type="AssemblyProductAttribute" value="${product.name}" />
+			<attribute type="AssemblyVersionAttribute" value="${version}" />
+			<attribute type="AssemblyFileVersionAttribute" value="${version}" />
+
+			<if test="${property::exists('AssemblyCompany')}">
+				<attribute type="AssemblyCompanyAttribute"  
+					value="${AssemblyCompany}" />
+			</if>
+			<if test="${property::exists('AssemblyCopyright')}">
+				<attribute type="AssemblyCopyrightAttribute" if="${property::exists('AssemblyCopyright')}" 
+					value="${AssemblyCopyright}" />
+			</if>
+		</attributes>
+		</asminfo>
+	</target>
+
+</project>

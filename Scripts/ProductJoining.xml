@@ -1,0 +1,152 @@
+﻿<?xml version="1.0"?>
+<project default="join">
+
+<!-- begin of targets ONLY for product being joined -->
+<!-- input property 'productMain.dir' -->
+<!-- input property 'productMain.name' -->
+<!-- input property 'webMain.dir' -->
+<!-- input property 'outputMain.dir' -->
+
+	<target name="joinWeb" >
+    <echo>web copied from ${product.dir}\ASPXFolder to ${webMain.dir}</echo>
+    <copy todir="${webMain.dir}" if="${directory::exists(webMain.dir)}">
+      <fileset basedir="${product.dir}\ASPXFolder">
+			        <include name="**/*.aspx*" />
+			        <include name="**/*.ascx*" />
+			        <include name="**/*.js" />
+			        <include name="**/*.gif" />
+			        <include name="**/*.jpg" />
+			        <include name="**/*.png" />
+			        <include name="**/*.css" />
+			        <include name="**/*.cs*" />
+			</fileset>
+		</copy>
+		<copy todir="${outputMain.dir}">
+			<fileset basedir="${output.dir}">
+			        <include name="${product.name}*" />
+			</fileset>
+		</copy>	
+		<copy todir="${outputMain.dir}">
+			<fileset basedir="${output.dir}">
+			        <include name="**/*.resources.dll" />
+			</fileset>
+		</copy>
+
+    <copy todir="${productMain.dir}\Framework" overwrite="true"
+          if="${directory::exists(productMain.dir+'\Framework')}" >
+      <fileset basedir="${output.dir}">
+        <include name="${product.name}*" />
+      </fileset>
+    </copy>
+
+  </target>
+	<target name="joinAgain">
+		<if test="${property::exists('productMain.dir')}" >
+		  	<call target="updateProjectReferences" cascade="false" failonerror="False" />
+	  		<call target="joinWeb" if="${not target::exists('joinOther')}" failonerror="False" />
+	  		<call target="joinOther" if="${target::exists('joinOther')}" failonerror="False" />
+	  	</if>
+	</target>
+<!-- end of -->
+
+
+	<target name="join" depends="installinit" >
+		<xmlpeek file="${install.log}" xpath="/product/joinedProducts" property="result" />
+
+		<description>Перебираються усі використовувані продукти. 
+		І для кожного з них виконується операція Join. 
+		Результати виконання фіксуються у файлі Install.log.</description>
+		<property name="i" value="-1" />
+		<xmlpeek file="${currentVersion.xml}" xpath="/product" property = "xml"	/>
+		<foreach item="String" in="${xml}" delim="&lt;" property = "test" >
+			<if test="${(int::parse(i)>=0) and (string::index-of(test, 'usesProduct') == 0)}" ><!-- бо чомусь цикл починається з порожнього -->
+				<xmlpeek file="${currentVersion.xml}" xpath="/product/usesProduct/@name" 
+					nodeindex = "${i}" property = "sName" />
+				<xmlpeek file="${currentVersion.xml}" xpath="/product/usesProduct/@major" 
+					nodeindex = "${i}" property = "sMajor" />
+				<xmlpeek file="${currentVersion.xml}" xpath="/product/usesProduct/@minor" 
+					nodeindex = "${i}" property = "sMinor" />
+        <property name="sProductSet" value="" />
+        <xmlpeek file="${currentVersion.xml}" xpath="/product/usesProduct/@productSet" failonerror="False"
+          nodeindex = "${i}" property = "sProductSet" />
+
+        <property name="dest" value="" />
+				<xmlpeek file="${install.log}" xpath="/product/joinedProducts/joinedProduct[@name='${sName}']/@name" property="dest" failonerror="False" />
+
+				<xmlpeek property="destProductRegistered" file="${Products.xml}" 
+						xpath="/products/product[@name='${sName}']/version[@major='${sMajor}'][@minor='${sMinor}']" />
+				<property name="destProductDirRegistered" dynamic="True" value="" />
+				<xmlpeek property="destProductDirRegistered" file="${Products.xml}" failonerror="False"
+						xpath="/products/product[@name='${sName}']/version[@major='${sMajor}'][@minor='${sMinor}']/@dir" />
+				<if test="${ string::get-length(destProductDirRegistered) > 0 }">
+          <property name="destBuildFile" value="${destProductDirRegistered}/${sName}.sln.build" />
+					<property name="destBuildFile" value="${destProductDirRegistered}/${sName}.build" if="${not file::exists(destBuildFile)}" />
+					<ifnot test="${ string::get-length(dest) > 0 }">
+						<echo>No joined product ${dest} in the install.log</echo>
+<!--NAnt-->				<nant buildfile="${destBuildFile}" target="join" failonerror="False" >
+							<properties>
+								<property name="productMain.dir" value="${product.dir}" />
+								<property name="productMain.name" value="${product.name}" />
+								<property name="webMain.dir" value="${web.dir}" />
+								<property name="outputMain.dir" value="${output.dir}" />
+                <property name="project.config" value="${sProductSet}" if="${string::get-length(sProductSet)>0}" />
+                <property name="productMain.version.major" value="${product.version.major}" />
+								<property name="productMain.version.minor" value="${product.version.minor}" />
+							</properties>
+						</nant>
+						<property name="result" 
+							value="${result}&lt;joinedProduct name='${sName}' major='${sMajor}' minor='${sMinor}' date='${datetime::now()}' /&gt;" />
+					</ifnot>
+					<if test="${ string::get-length(dest) > 0 }">
+						<echo>Exists joined product ${dest} in the install.log</echo>
+						<xmlpeek file="${install.log}" xpath="/product/joinedProducts/joinedProduct[@name='${sName}']/@major" property="dMajor" />
+						<xmlpeek file="${install.log}" xpath="/product/joinedProducts/joinedProduct[@name='${sName}']/@minor" property="dMinor" />
+						<if test="${sMajor!=dMajor or sMinor!=dMinor}">
+							<description>Якщо виявиться, що якийсь продукт підключається частіше, 
+							ніж двічі і при цьому підключається різна його версія, то виникає помилка.</description>
+							<fail message="Product ${sName} has wrong version ${sMajor}.${sMinor}." />
+						</if>
+<!--NAnt-->				<nant buildfile="${destBuildFile}" target="joinAgain" failonerror="False" >
+							<properties>
+								<property name="productMain.dir" value="${product.dir}" />
+								<property name="productMain.name" value="${product.name}" />
+								<property name="webMain.dir" value="${web.dir}" />
+								<property name="outputMain.dir" value="${output.dir}" />
+                <property name="project.config" value="${sProductSet}" if="${string::get-length(sProductSet)>0}" />
+                <property name="productMain.version.major" value="${product.version.major}" />
+								<property name="productMain.version.minor" value="${product.version.minor}" />
+							</properties>
+						</nant>
+					</if>
+				</if>
+			</if>
+			<property name="i" value="${int::parse(i) + 1}" />
+		</foreach>
+
+		<xmlpoke file="${install.log}" xpath="/product/joinedProducts" value="${result}" />
+
+<!-- begin of block called in recursion inside product being joined -->
+	  <call target="joinAgain" />
+		<if test="${property::exists('productMain.dir')}" >
+			<property name="j2" value="" />
+			<xmlpeek file="${currentVersion.xml}" failonerror="False" xpath="/product/joinedToProducts" 
+				property = "j2" />
+			<ifnot test="${string::get-length(j2)>0}" >
+				<xmlpeek file="${currentVersion.xml}" xpath="/product" property="tempresult" />
+				<xmlpoke file="${currentVersion.xml}" xpath="/product" value="${tempresult}&lt;joinedToProducts /&gt;" />
+		  	</ifnot>
+			<property name="j2" value="" />
+			<xmlpeek file="${currentVersion.xml}" failonerror="False"
+				xpath="/product/joinedToProducts/joinedToProduct[@name='${productMain.name}'][@major='${productMain.version.major}'][@minor='${productMain.version.minor}']" 
+				property = "j2" />
+			<ifnot test="${string::get-length(j2)>0}" >
+				<xmlpeek file="${currentVersion.xml}" xpath="/product/joinedToProducts" property="tempresult" />
+				<xmlpoke file="${currentVersion.xml}" 
+					xpath="/product/joinedToProducts" 
+					value="${tempresult}&lt;joinedToProduct name='${productMain.name}' major='${productMain.version.major}' minor='${productMain.version.minor}' /&gt;" />
+		  	</ifnot>
+	  	</if>
+<!-- end of -->
+	</target>
+
+</project>

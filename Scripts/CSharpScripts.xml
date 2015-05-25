@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<project>
+
+      <script language="C#" prefix="generate" >	
+	<code>
+<![CDATA[
+              [Function("NewGuid")]
+              public static string NewGuid() {
+                  return Guid.NewGuid().ToString();
+              }
+]]>
+   	</code>
+      </script>
+
+</project>

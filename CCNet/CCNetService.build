@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<project default="CCServiceInstall">
+
+  <include buildfile="CCNetServer.build" />
+
+  <target name="CCServiceInstall" depends="CCNetBinInit" >
+	<exec program="${framework::get-assembly-directory(framework::get-runtime-framework())}\installutil.exe"
+		commandline="/ServiceName=&quot;CCService ${currentDeploy}&quot; ccservice.exe" workingdir="${ccnet.bin.dir}" />
+<!--
+	<servicecontroller action="Start" service="CCService ${currentDeploy}" />
+-->
+  </target>
+
+  <target name="CCServiceUnInstall" >
+	<servicecontroller action="Stop" service="CCService ${currentDeploy}" />
+	<exec program="${framework::get-assembly-directory(framework::get-runtime-framework())}\installutil.exe"
+		commandline="/u /ServiceName=&quot;CCService ${currentDeploy}&quot; ccservice.exe" workingdir="${ccnet.bin.dir}" />
+  </target>
+
+</project>

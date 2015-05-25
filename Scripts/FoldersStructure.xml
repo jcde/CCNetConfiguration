@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<project>
+  <!-- propetries here till target (and web.config) may be overriden in specific project -->
+	<property name="currentDeploy" value="${path::get-file-name-without-extension( environment::get-variable('currentDeploy') )}" />
+	<property name="autobuilds.dir" value="${ path::get-directory-name(path::get-directory-name(path::get-directory-name(path::get-directory-name(environment::get-variable('currentDeploy')	)))) }" />
+	<property name="root.dir" value="${ path::get-directory-name(path::get-directory-name(path::get-directory-name(path::get-directory-name(environment::get-variable('currentDeploy')	)))) }" />
+ 	<property name="programs86" value="${environment::get-variable('ProgramFiles')}" />
+  <if test="${environment::get-variable('PROCESSOR_ARCHITECTURE')!='x86'}" >
+  	<property name="programs86" value="${environment::get-variable('ProgramFiles(x86)')}" />
+  </if> 
+	<property name="svn.exe" value="svn" /> <!--${environment::get-folder-path('ProgramFiles')}\Subversion\bin\svn.exe" /-->
+
+ 	<property name="sources.dir" value="${ path::get-directory-name(path::get-directory-name(path::get-directory-name(environment::get-variable('currentDeploy')	))) }" />
+	<property name="config.dir"  value="${sources.dir}\Configuration" />
+	<property name="scripts.dir" value="${config.dir}\DeployEnvironments\Scripts" /> 
+	<property name="proj.dir" value="${sources.dir}\Projects" />
+	<property name="core.dir"  value="${proj.dir}\Core" />
+	<property name="core.framework.dir"  value="${sources.dir}\Framework" />
+	<!--property name="core.framework.dir"  value="${ string::substring(core.dir, 0, string::last-index-of(core.dir, '\')) }\Framework" /-->
+	<property name="Products.xml" value="${config.dir}\Products.xml" />
+
+	<property name="build.file" value="${path::get-file-name( project::get-buildfile-uri() )}" />
+
+	<property name="product.dir" value="${string::replace(path::get-directory-name( project::get-buildfile-uri() ), 'file:\', '') }" />
+	<property name="product.config.dir" value="${product.dir}\Config" />
+	<property name="tags.dir" value="${ string::substring(product.dir, 0, string::last-index-of(product.dir, '\')) }\tags" />
+	<property name="modules.dir" value="${sources.dir}\Modules" />
+	
+	<property name="build.dir" value="${product.dir}" />
+	<property name="bin.dir" value="${product.dir}\bin" />
+	<property name="metrics.dir" value="${product.dir}\metrics" />
+
+	<property name="currentVersion.xml" value="${path::combine( product.dir, 'currentVersion.xml' )}" />
+
+	<property name="day" value="${string::substring(datetime::now(), 3, 2)}" />
+	<property name="month" value="${string::substring(datetime::now(), 0, 2)}" />
+	<property name="year" value="${string::substring(datetime::now(), 9, 1)}" />
+
+  <property name="product.name" value="${path::get-file-name-without-extension( build.file )}" failonerror="false" />
+  <xmlpeek property="product.name" if="${file::exists(currentVersion.xml)}" 
+           file="${currentVersion.xml}" xpath="/product/@name" />
+
+	<property name="web.dir" value="${product.dir}\${product.name}.Web" />
+
+	<xmlpeek property="product.version.major" file="${currentVersion.xml}"  
+		xpath="/product/@major" if="${file::exists(currentVersion.xml)}" />
+	<xmlpeek property="product.version.minor" file="${currentVersion.xml}"  
+		xpath="/product/@minor" if="${file::exists(currentVersion.xml)}" />
+	<xmlpeek property="product.version.build" file="${currentVersion.xml}" 
+		xpath="/product/@build" if="${file::exists(currentVersion.xml)}" />
+	<xmlpeek property="product.version.revision" file="${currentVersion.xml}" 
+		xpath="/product/@revision" if="${file::exists(currentVersion.xml)}" />
+  <xmlpeek property="dotNetVersionMajor" file="${currentVersion.xml}" failonerror="false" if="${file::exists(currentVersion.xml)}"
+		xpath="/product/usesProduct[@name='Microsoft .Net Framework']/@major" />
+	<xmlpeek property="dotNetVersionMinor" file="${currentVersion.xml}" failonerror="false" if="${file::exists(currentVersion.xml)}"
+		xpath="/product/usesProduct[@name='Microsoft .Net Framework']/@minor" />
+	<property name="nant.settings.currentframework" if="${property::exists('dotNetVersionMajor')}" 
+		value = "${ 'net-' + dotNetVersionMajor + '.' + dotNetVersionMinor }" />
+
+	<if test="${property::exists('product.version.major')}" >
+		<property name="productDirRegistered" dynamic="True" value="" />
+		<xmlpeek property="productDirRegistered" file="${Products.xml}" failonerror="false"
+			xpath="/products/product[@name='${product.name}']/version[@major='${product.version.major}'][@minor='${product.version.minor}']/@dir" />
+
+		<if test="${string::to-lower(productDirRegistered) != string::to-lower(product.dir)}" > 
+			<fail message="Update version or product dir in '${Products.xml}' to ${product.dir}. ${productDirRegistered} is wrong." />
+		</if>
+    
+  	<xmlpeek property="deployArgs" file="${Products.xml}" failonerror="false"
+			xpath="/products/product[@name='${product.name}']/version[@major='${product.version.major}'][@minor='${product.version.minor}']/auto[@deploy='${currentDeploy}']/@args" />
+  </if>
+
+  <target name="init">
+    <property name="web.config" value="${web.dir}\web.config" overwrite="false" />
+
+    <copy todir="${product.dir}" if="${directory::exists(product.config.dir+'\'+currentDeploy)}" failonerror="false" >
+      <fileset basedir="${product.config.dir}\${currentDeploy}">
+        <include name="**/*.config" />
+      </fileset>
+    </copy>
+
+    <property name="sln.file" value="${path::get-file-name-without-extension( project::get-buildfile-uri() )}" />
+		<property name="sln.file" value="${sln.file}.sln" if="${file::exists(sln.file+'.sln')}" />
+
+		<property name="pnl" value="${string::get-length(product.name) + 1}" />
+		<property name="slnIndex" value="${string::index-of(build.file, '.sln')}" />
+		<if test="${int::parse(slnIndex) > int::parse(pnl)}" >
+			<property name="productset.name" 
+				value="${string::substring( build.file, pnl, 
+							    int::parse(slnIndex) - int::parse(pnl) )}" />
+		</if>
+		<if test="${not (int::parse(slnIndex) > int::parse(pnl))}" >
+			<property name="buildIndex" value="${string::index-of(build.file, '.build')}" />
+			<if test="${int::parse(slnIndex) == -1 and (int::parse(buildIndex) > int::parse(pnl))}" >
+				<property name="productset.name" 
+					value="${string::substring( build.file, pnl, 
+							    int::parse(buildIndex) - int::parse(pnl) )}" />
+			</if>
+			<if test="${not (int::parse(slnIndex) == -1 and (int::parse(buildIndex) > int::parse(pnl)))}" >
+				<property name="productset.name" value="${project.config}" />
+			</if>
+		</if>
+
+	<property name="version" value="${product.version.major}.${product.version.minor}.${product.version.build}.${product.version.revision}" failonerror="false"/>
+	<property name="version3" value="${product.version.major}.${product.version.minor}.${product.version.build}" failonerror="false"/>
+	<property name="version3short" value="${product.version.major}${product.version.minor}${product.version.build}" failonerror="false"/>
+
+	<property name="productNameRegistered" value="" />
+	<xmlpeek property="productNameRegistered" file="${Products.xml}" 
+		xpath="/products/product[@name='${product.name}']/@name" />
+	<if test="${not (string::get-length(productNameRegistered)>0)}" >
+		<fail message="Register product in '${Products.xml}'" />
+	</if>
+ 	<property name="product.nameVersion" 
+        		value="${product.name}.${productset.name}_${product.version.major}_${product.version.minor}_${product.version.build}" failonerror="false"/>
+
+	<property name="output.dir" value="${bin.dir}\${productset.name}" />
+
+	</target>
+</project>

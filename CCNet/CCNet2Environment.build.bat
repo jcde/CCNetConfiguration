@@ -1,0 +1,1 @@
+nant -buildfile:CCNet2Environment.build > 1

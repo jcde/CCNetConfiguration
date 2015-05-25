@@ -1,0 +1,165 @@
+<?xml version="1.0"?>
+<project default="debug">
+
+	<target name="testsInit" depends="build">
+		<property name="xPathProductVersionDeploy" value="/products/product[@name='${product.name}']/version[@major='${product.version.major}'][@minor='${product.version.minor}'][auto/@deploy='${currentDeploy}']" />
+		<property name="autoXml" value="" />
+		<xmlpeek property="autoXml" file="${Products.xml}" xpath="${xPathProductVersionDeploy}" failonerror="false" />
+	
+		<property name="testOnly" value="" />
+		<xmlpeek property="testOnly" file="${Products.xml}" if="${string::index-of(autoXml, 'testOnly') != -1}"
+			xpath="${xPathProductVersionDeploy}/auto/@testOnly" />
+		<property name="testOnly" value="*.dll" if="${string::get-length(testOnly) == 0}"/>			
+		<property name="testOnly" value="${product.name}*" if="${testOnly == 'This'}"/>
+ 
+		<property name="excludeFiles" 	value="nunit.framework.dll" />
+		<foreach item="File" property="vshostfilename">
+			<in>
+				<items basedir="${output.dir}" >
+					<include name="*.vshost.exe" />
+				</items>
+			</in>
+			<do>
+				<property name="excludeFiles" 	value="${excludeFiles}
+${vshostfilename}" />
+			</do>
+		</foreach>
+
+		<property name="excludeTest" 	value="" />
+		<xmlpeek property="excludeTest" file="${Products.xml}" if="${string::index-of(autoXml, 'excludeTest') != -1}"
+			xpath="${xPathProductVersionDeploy}/auto/@excludeTest" />
+		<if test="${string::get-length(excludeTest) > 0}" >
+			<foreach item="String" in="${excludeTest}" delim=";" property="s">    
+				<property name="excludeFiles" 	value="${excludeFiles}
+${s}" />
+			</foreach>
+    </if>
+    <echo file="${output.dir}\${product.name}.excludeTest" message="${excludeFiles}" />
+  </target>
+	
+	<target name="test" depends="testsInit" >
+		<mkdir dir="${metrics.dir}\nunit" if="${not directory::exists(metrics.dir+'\nunit')}" />
+		<delete>
+		    <fileset basedir="${metrics.dir}\nunit" >
+		        <include name="*.*" />
+		    </fileset>
+		</delete>
+
+		<nunit2 failonerror="false" haltonfailure="false" >
+			<formatter type="Xml" usefile="true" extension=".xml" 
+				outputdir="${metrics.dir}\nunit" 
+			/>
+
+			<test>
+				<assemblies basedir="${output.dir}" > 
+				  	<include name="${testOnly}" if="${string::get-length(testOnly) > 0}" />
+				  	<include name="*.exe" />
+					<excludesfile name="${output.dir}\${product.name}.excludeTest" />
+				</assemblies> 
+			</test>
+		</nunit2>
+	</target>
+
+	<target name="ncover" depends="test" >
+		<mkdir dir="${metrics.dir}\ncover" if="${not directory::exists(metrics.dir+'\ncover')}" />
+		<delete>
+		    <fileset basedir="${metrics.dir}\ncover" >
+		        <include name="*.*" />
+		    </fileset>
+		</delete>
+
+		<property name="path.ncoverexplorer.console"	value="${environment::get-folder-path('ProgramFiles')}\NCover\NCoverExplorer.Console.exe" />
+		<if test="${int::parse(dotNetVersionMajor)==1}" >		
+			<property name="path.ncover.console"	value="${environment::get-folder-path('ProgramFiles')}\NCover1_1\NCover.Console.exe" />
+			<property name="path.nunit.console" 	value="${environment::get-folder-path('ProgramFiles')}\NUnit 2.2\Bin\nunit-console.exe" />
+
+			<foreach item="File" in="${metrics.dir}\nunit" property="filename" >    
+				<xmlpeek property="dll.name" file="${filename}" xpath="test-results/@name" />
+				<exec program="${path.ncover.console}" failonerror="false" 
+					workingdir="${path::get-directory-name(path.ncover.console)}"
+					commandline="/c &quot;${path.nunit.console}&quot; ${dll.name} /o ${metrics.dir}\ncover\${path::get-file-name(dll.name)}-Coverage.xml"
+				/>				
+			</foreach>
+		</if>
+		<if test="${int::parse(dotNetVersionMajor)>1}" >		
+			<property name="path.ncover.console"	value="${environment::get-folder-path('ProgramFiles')}\NCover\NCover.Console.exe" />
+			<property name="path.nunit.console" 	value="${environment::get-folder-path('ProgramFiles')}\NUnit 2.4.8\Bin\nunit-console-x86.exe" />
+
+			<foreach item="File" in="${metrics.dir}\nunit" property="filename" >    
+				<xmlpeek property="dll.name" file="${filename}" xpath="test-results/@name" />
+				<exec program="${path.ncover.console}" failonerror="false" 
+					workingdir="${path::get-directory-name(path.ncover.console)}"
+					commandline="&quot;${path.nunit.console}&quot; &quot;${dll.name}&quot; //x &quot;${metrics.dir}\ncover\${path::get-file-name(dll.name)}-Coverage.xml&quot; //w &quot;${output.dir}&quot; //reg"
+				/>
+			</foreach>
+		</if>
+
+			<exec program="${path.ncoverexplorer.console}" failonerror="false" 
+				workingdir="${path::get-directory-name(path.ncoverexplorer.console)}" >
+				<!-- Names of the coverage.xml file(s) to merge into the coverage report -->
+				<arg value="&quot;${metrics.dir}\ncover\*-Coverage.xml&quot;" />
+				<!-- /r[eport] Report type e.g. 'None' (default), 'NCoverHTMLReport', 
+				'ModuleSummary', 'ModuleMethodSummary', 'ModuleNamespaceSummary',
+				'ModuleClassSummary', 'ModuleClassFunctionSummary', 'ModuleMethodFunctionSummary' -->
+				<arg value="/r:ModuleClassSummary"/>
+				<!-- /x[ml][:filename] If specified will generate an xml report.         -->
+				<!--                   If no filename uses CoverageReport.xml            -->
+				<arg value="/x:${metrics.dir}\ncover\CoverageReport.xml" />
+				<!-- /h[tml][:filename] If specified will generate an html report.       -->
+				<!--                    If no filename uses CoverageReport.html          -->
+				<arg value="/h:${metrics.dir}\ncover\CoverageReport.html" />
+				<!-- /e[xclusions] Include an exclusions footer in the report.           -->
+				<arg value="/e" />
+				<!-- /p[roject] Project name to appear in the report                     -->
+				<arg value="/p:NCoverExplorer" />
+				<!-- /m[inCoverage] Minimum acceptable coverage threshold.               -->
+				<arg value="/m:20" />
+				<!-- /f[ailMinimum] Fail the build if coverage < minimum threshold.      -->
+				<!--<arg value="/f" />-->
+				<!-- /c[onfig] configuration file -->
+				<!--<arg value="/c:MyProject.config" />-->
+				<!-- /s[ave][:filename] If specified will save merged coverage to a file -->
+				<!--                   If no filename uses CoverageMerge.xml             -->
+				<!--<arg value="/s" />-->
+			</exec>
+	</target>
+	
+	<target name="fxcop" depends="build" >
+		<mkdir dir="${metrics.dir}\fxcop" />
+    <exec program="${environment::get-folder-path('ProgramFiles')}\Microsoft FxCop 1.36\fxcopcmd.exe" 
+		      commandline="/f:${output.dir}\*.dll /o:${metrics.dir}\fxcop\result.xml" failonerror="false"/>
+
+		<!--fxcop analysisReportFilename="${metrics.dir}\fxcop" projectFile="${build.dir}\test.fxcop" >
+			<targets> 
+				<include name="${output.dir}\*.dll" />
+				<include name="${output.dir}\*.exe" />
+			</targets> 
+		</fxcop-->
+	</target>
+
+	<target name="simian" depends="build" >
+    <exec program="${environment::get-folder-path('ProgramFiles')}\simian\simian-2.2.24.exe" >
+      <arg value="-includes=**/*.cs"/>
+  		<arg value="-formatter=xml:${metrics.dir}\simian.xml"/>
+    </exec>  
+	</target>
+  
+	<target name="codestats" depends="init" >
+		<mkdir dir="${metrics.dir}\codestats" />
+		<codestats output="${metrics.dir}\codestats\results.xml" buildname="${project.config}" >
+		    <counts>
+		        <count label="C#">
+		            <fileset>
+		                <include name="**/*.cs" />
+		            </fileset>
+		        </count>
+		        <count label="VB">
+		            <fileset>
+		                <include name="**\*.vb" />
+		            </fileset>
+		        </count>
+		    </counts>
+		</codestats>
+	</target>
+
+</project>

@@ -1,0 +1,148 @@
+<?xml version="1.0"?>
+
+
+<!-- projects may describe the target 'installBefore' -->
+<!-- projects may describe the target 'uninstallAfter' -->
+
+
+<project default="install">
+
+	<include buildfile="${ path::combine(   path::get-directory-name( environment::get-variable('currentDeploy') ),
+                  'Scripts\CSharpScripts.xml') }" />
+
+	<target name="installinit" depends="init" >
+		<property name="install.log" value="${path::combine( product.dir, 'install.log' )}" />
+		<if test="${not file::exists('install.log')}">
+			<copy file="${currentVersion.xml}" tofile="${install.log}" />
+			<xmlpoke file="${install.log}" xpath="product"	
+				value="&lt;joinedProducts /&gt;&lt;configurationChanges /&gt;" />
+		</if>
+	</target>
+	
+	<target name="install" depends="installinit" >
+	  	<call 	if="${target::exists('installBefore')}" 
+			target="installBefore" />
+
+
+		<!-- for every Web-project web-application will be created -->	
+		<property name="y" value="" />
+		<foreach item="Line" in="${sln.file}" delim="=" property="x,y" if="${file::exists(sln.file)}">
+			<if test="${string::get-length(y)>0}" >
+				<property name="s" value="${string::index-of(y, 'http://')}" />
+				<if test="${int::parse(s)>0}" >
+					<property name="prName" value="${string::substring(y,2,int::parse(s)-6)}" />
+					<property name="dest" value="" />
+					<xmlpeek file="${install.log}" xpath="/product/configurationChanges/webApplication[@name='${prName}']/@name" property="dest" failonerror="False" />
+					<if test="${ string::get-length(dest) == 0 }">
+						<echo message="Installed web project name - ${prName}" />
+						<xmlpeek file="${install.log}" xpath="/product/configurationChanges" property="result" />
+						<xmlpoke file="${install.log}" xpath="/product/configurationChanges" 
+							value="${result}&lt;webApplication name='${prName}' /&gt;" />
+						
+						<mkiisdir iisserver="${webserver}" dirpath="${product.dir}\${prName}" vdirname="${webpathPrefix}${prName}" />
+						
+					</if>
+		  		        <xmlpeek property="dbserver" file="${currentVersion.xml}" xpath="/product/databases/@server" /> 
+					<copy file="${product.config.dir}\${currentDeploy}\web.config" todir="${prName}" failonerror="False" />
+					<property name="template" dynamic="True" value="" />
+					<xmlpeek property="template" file="${product.config.dir}\${currentDeploy}\web.config" xpath="/" />
+					<xmlpoke file="${prName}\web.config" value="${template}" xpath="/" />
+				</if>
+			</if>
+		</foreach>
+
+		<description>for each product from ${currentVersion.xml} target updateProjectReferences called.</description>
+		<property name="i" value="-1" />
+		<xmlpeek file="${currentVersion.xml}" xpath="/product" property = "xml"	/>
+		<foreach item="String" in="${xml}" delim="&lt;" property = "test" >
+			<if test="${(int::parse(i)>=0) and (string::index-of(test, 'usesProduct') == 0)}" ><!-- one more loop -->
+				<xmlpeek file="${currentVersion.xml}" xpath="/product/usesProduct/@name" 
+					nodeindex = "${i}" property = "sName" />
+				<xmlpeek file="${currentVersion.xml}" xpath="/product/usesProduct/@major" 
+					nodeindex = "${i}" property = "sMajor" />
+				<xmlpeek file="${currentVersion.xml}" xpath="/product/usesProduct/@minor" 
+					nodeindex = "${i}" property = "sMinor" />
+
+				<xmlpeek property="destProductRegistered" file="${Products.xml}" 
+					xpath="/products/product[@name='${sName}']/version[@major='${sMajor}'][@minor='${sMinor}']" />
+
+				<property name="destProductDirRegistered" dynamic="True" value="" />
+				<xmlpeek property="destProductDirRegistered" file="${Products.xml}" failonerror="False"
+					xpath="/products/product[@name='${sName}']/version[@major='${sMajor}'][@minor='${sMinor}']/@dir" />
+				<if test="${ string::get-length(destProductDirRegistered) > 0 }">
+<!--NAnt-->			<nant buildfile="${destProductDirRegistered}/${sName}.sln.build" target="updateProjectReferences" >
+					<properties>
+						<property name="productMain.dir" value="${product.dir}" />
+						<property name="productMain.name" value="${product.name}" />
+					</properties>
+					</nant>
+				</if>
+
+				<property name="result" value="" if="${not property::exists('result')}" />
+				<property name="result" 
+					value="${result}&lt;joinedProduct name='${sName}' major='${sMajor}' minor='${sMinor}' date='${datetime::now()}' /&gt;" />
+			</if>
+			<property name="i" value="${int::parse(i) + 1}" />
+		</foreach>
+	
+	</target>
+	
+	<target name="uninstall" depends="installinit" >
+
+		<xmllist property="webDirs" file="${install.log}"
+			xpath="/product/configurationChanges/webApplication/@name" /> 
+		<foreach item="String" delim="," in="${webDirs}" property="prName">    
+			<deliisdir iisserver="${webserver}" vdirname="${webpathPrefix}${prName}" failonerror="false" />
+		</foreach>
+		<xmlpoke file="${install.log}" xpath="/product/configurationChanges" value="" />
+
+	  	<call 	if="${target::exists('uninstallAfter')}" 
+			target="uninstallAfter" />
+	
+	</target>
+
+	<!-- called from the main product -->
+	<!-- input property 'productMain.dir' -->
+	<!-- input property 'productMain.name' -->
+	<target name="updateProjectReferences" depends="init" >
+	
+		<property name="y" value="" />
+		<foreach item="Line" in="${sln.file}" delim="=" property="x,y">
+		<if test="${string::get-length(y)>0}" >
+			<property name="s" value="${string::index-of(y, ',')}" />
+				<if test="${int::parse(s)>0}" >
+					<property name="prName" value="${string::substring(y,2,int::parse(s)-3)}" />
+					<property name="slast" value="${string::last-index-of(y, ',')}" />
+					<property name="prPath" value="${string::replace(string::substring(y,int::parse(s)+3,int::parse(slast)-int::parse(s)-4), 'http://localhost/', '')}" />
+
+					<xmlpeek property="prFile" file="${product.dir}\${prPath}" failonerror="false" if="${dotNetVersionMajor=='1'}" 
+						xpath="//Settings/@AssemblyName">
+					</xmlpeek>
+					<xmlpeek property="prFile" file="${product.dir}\${prPath}" failonerror="false" if="${dotNetVersionMajor=='2'}" 
+						xpath="//x:AssemblyName">
+						<namespaces><namespace prefix="x" uri="http://schemas.microsoft.com/developer/msbuild/2003" />
+						</namespaces>
+					</xmlpeek>
+
+					<echo message="Joined project name - ${prName} to dir ${productMain.dir}" />
+					<foreach item="File" property="filename">
+						<in>
+							<items basedir="${productMain.dir}" >
+								<include name="**\*.csproj" />
+							</items>
+						</in>
+						<do>
+							<echo message="Updated ${filename}. " />
+							<pathabsolute2relative relativePathProp="result" absPath="${output.dir+'\'+prFile+'.dll'}" baseDir="${path::get-directory-name(filename)}" />
+
+							<xmlpoke file="${filename}"
+								xpath="/VisualStudioProject/CSHARP/Build/References/Reference[@Name = '${prName}']/@HintPath"
+								value="${result}" />
+						</do>
+					</foreach>
+				</if>
+			</if>
+		</foreach>
+
+	</target>
+</project>

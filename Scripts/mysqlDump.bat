@@ -1,0 +1,1 @@
+mysqldump.exe %1 -h %4 --routines -u %5 -p%6 --default-character-set=utf8 --single-transaction --quick | %2 -P %7 "%3" -

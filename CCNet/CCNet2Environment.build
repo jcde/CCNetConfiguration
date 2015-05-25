@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<project default="CCNetConfig">
+
+  <include buildfile="${environment::get-variable('currentDeploy')}" />
+
+  <property name="ccnet.dir" value="${sources.dir}\Configuration\DeployEnvironments\CCNet" /> 
+  <property name="ccnet.mainconfig.dir" value="${ccnet.dir}\ccnet.configs" /> 
+  <property name="ccnet.binIni.dir" value="${ccnet.mainconfig.dir}\bin" /> 
+  <property name="ccnet.config.dir" value="${ccnet.mainconfig.dir}\${currentDeploy}" /> 
+  <property name="ccnet.config" value="${ccnet.config.dir}\ccnet.config" /> 
+
+<!-- Adding new project element for the every product/version[./auto/@deploy='${currentDeploy}'] -->
+  <target name="CCNetConfig" >
+	<copy todir="${ccnet.config.dir}\xsl">
+		<fileset basedir="${ccnet.binIni.dir}\xsl">
+			<include name="*" />
+		</fileset>
+	</copy>
+	<copy todir="${ccnet.config.dir}\images">
+		<fileset basedir="${ccnet.binIni.dir}\images">
+			<include name="*" />
+		</fileset>
+	</copy>
+  <property name="_good" value="0" />     
+  <copy tofile="${ccnet.config}" file="${ccnet.mainconfig.dir}\ccnet.config" />
+  <xmlpeek property="result" file="${ccnet.mainconfig.dir}\ccnet.config" xpath="/cruisecontrol" /> 
+	<xmllist property="AutoProducts" file="${Products.xml}"
+        xpath="/products/product[./version/auto/@deploy='${currentDeploy}']/@name" /> 
+
+    <foreach item="String" delim="," in="${AutoProducts}" property="AutoProduct.name">
+      <property name="_good" value="1" />     
+			<property name="AutoProduct.dir.dynamic" value="" dynamic="true" />
+			<xmlpeek property="AutoProduct.dir.dynamic" file="${Products.xml}"
+				xpath="/products/product/version[../@name='${AutoProduct.name}'][./auto/@deploy='${currentDeploy}']/@dir" /> 
+			<xmlpeek property="AutoProduct.dir" file="${Products.xml}"
+				xpath="/products/product/version[../@name='${AutoProduct.name}'][./auto/@deploy='${currentDeploy}']/@dir" /> 
+
+			<property name="i" value="" />
+	    	<xmlpeek property="i" file="${ccnet.config}"
+			    xpath="/cruisecontrol/project/name[.='${AutoProduct.name}']" failonerror="false" /> 
+			<!--ifnot test="${property::exists('i') and string::get-length(i) > 0}" -->
+				<echo message="Added project ${AutoProduct.name} into ccnet.config" />   
+
+				<xmlpeek property="major" file="${Products.xml}"
+					xpath="/products/product/version[@dir='${AutoProduct.dir}']/@major" /> 
+				<xmlpeek property="minor" file="${Products.xml}"
+					xpath="/products/product/version[@dir='${AutoProduct.dir}']/@minor" /> 
+                                         
+				<property name="projccnetConfigPart" value="${ccnetConfigPart}" dynamic="true" />
+				<xmlpeek property="projccnetConfigPart" file="${Products.xml}" failonerror="false"
+						xpath="/products/product/version[@dir='${AutoProduct.dir}']/auto[@deploy='${currentDeploy}']/ccnetConfigPart" />
+
+				<property name="projPublishers" value="" dynamic="true" />
+				<xmlpeek property="projPublishers" file="${Products.xml}" failonerror="false"
+						xpath="/products/product/version[@dir='${AutoProduct.dir}']/auto[@deploy='${currentDeploy}']/projPublishers" />
+            
+				<property name="projccnetPerm" value="" />
+				<xmlpeek property="projccnetPerm" file="${Products.xml}" failonerror="false"
+						xpath="/products/product/version[@dir='${AutoProduct.dir}']/auto[@deploy='${currentDeploy}']/ccnetPerm" /> 
+          
+				<property name="workingDirectory" value="${AutoProduct.dir.dynamic}" /> 
+				<mkdir dir="${workingDirectory}" />
+
+				<property name="AutoProduct.SVNdir" value="" dynamic="true" />
+        <property name="username" value="${SVNusername}" dynamic="true" />
+        <property name="password" value="${SVNpassword}" dynamic="true" />
+				<xmlpeek property="AutoProduct.SVNdir" file="${Products.xml}" failonerror="false"
+					xpath="/products/product/version[../@name='${AutoProduct.name}'][auto/@deploy='${currentDeploy}']/@SVNdir" /> 
+				<if test="${string::get-length(AutoProduct.SVNdir) > 0}" >
+					<property name="trunkUrl" value="${AutoProduct.SVNdir}" /> 
+					<xmlpeek property="username" file="${Products.xml}" failonerror="false"
+						xpath="/products/product/version[../@name='${AutoProduct.name}'][auto/@deploy='${currentDeploy}']/@username" /> 
+					<xmlpeek property="password" file="${Products.xml}" failonerror="false"
+						xpath="/products/product/version[../@name='${AutoProduct.name}'][auto/@deploy='${currentDeploy}']/@password" /> 
+				</if>
+				<xmlpeek property="AutoProduct.SVNdir" file="${Products.xml}" failonerror="false"
+					xpath="/products/product/version[../@name='${AutoProduct.name}']/auto[@deploy='${currentDeploy}']/@SVNdir" /> 
+				<if test="${string::get-length(AutoProduct.SVNdir) > 0}" >
+					<echo>!!!!${AutoProduct.SVNdir}</echo>
+					<property name="trunkUrl" value="${AutoProduct.SVNdir}" /> 
+				</if>
+				<ifnot test="${string::get-length(AutoProduct.SVNdir) > 0}" >
+					<property name="username" value="${SVNusername}" failonerror="false" /> 
+					<property name="password" value="${SVNpassword}" failonerror="false" /> 
+
+					<property name="autobuilds.dirD" value="${autobuilds.dir}" /> 
+					<if test="${string::ends-with(autobuilds.dir,':\')}" >
+						<property name="trunkUrl" value="${string::replace(string::replace(AutoProduct.dir.dynamic,sources.dir,autobuilds.SVNdir+'/Sources'),'\','/')}" /> 
+					</if>
+					<ifnot test="${string::ends-with(autobuilds.dir,':\')}" >
+						<property name="trunkUrl" value="${string::replace(string::replace(AutoProduct.dir.dynamic,autobuilds.dir,autobuilds.SVNdir),'\','/')}" /> 
+					</ifnot>
+				</ifnot>
+				
+				<property name="prSet" value="" /> 
+				<xmlpeek property="prSet" file="${Products.xml}" failonerror="false"
+					xpath="/products/product/version[@dir='${AutoProduct.dir}']/auto[@deploy='${currentDeploy}']/@productSet" />
+          
+        <!-- file exists checking works on local files but must look into reposisaty -->   
+				<if test="${string::get-length(prSet) > 0}" >
+					<property name="buildFile" value="${AutoProduct.dir.dynamic}\${AutoProduct.name}.${prSet}.build" /> 
+					<ifnot test="${file::exists(buildFile)}" >
+						<property name="buildFile" value="${AutoProduct.dir.dynamic}\${prSet}.build" /> 
+					</ifnot>
+				</if>
+				<ifnot test="${string::get-length(prSet) > 0}" >
+					<property name="buildFile" value="${AutoProduct.dir.dynamic}\${AutoProduct.name}.sln.build" /> 
+					<property name="buildFile" if="${not (file::exists(buildFile))}"
+								value="${AutoProduct.dir.dynamic}\${AutoProduct.name}.build" /> 
+				</ifnot>
+        
+        <property name="targetList" value="" /> 
+				<xmlpeek property="targetList" file="${Products.xml}" failonerror="false"
+					xpath="/products/product/version[../@name='${AutoProduct.name}']/auto[@deploy='${currentDeploy}']/targetList" /> 
+
+				<property name="notifyusers" value="" /> 
+				<property name="notifyChange" value="" /> 
+				<xmlpeek property="notifyChange" file="${Products.xml}" failonerror="false"
+					xpath="/products/product/version[../@name='${AutoProduct.name}']/auto[@deploy='${currentDeploy}']/@notifyChange" /> 
+				<if test="${string::get-length(notifyChange) > 0}" >
+					<property name="notifyusers" value="${notifyusers}&lt;user name='${notifyChange}' group='change' address='${notifyChange}'/&gt;" /> 
+				</if>
+				<property name="notifyAlways" value="" /> 
+				<xmlpeek property="notifyAlways" file="${Products.xml}" failonerror="false"
+					xpath="/products/product/version[../@name='${AutoProduct.name}']/auto[@deploy='${currentDeploy}']/@notifyAlways" /> 
+				<if test="${string::get-length(notifyAlways) > 0}" >
+					<property name="notifyusers" value="${notifyusers}&lt;user name='${notifyAlways}' group='always' address='${notifyAlways}'/&gt;" /> 
+				</if>
+
+     		<property name="xsltSuffix" value="" /> 
+   			<xmlpeek property="xsltSuffix" file="${Products.xml}" failonerror="false"
+      				xpath="/products/product/version[../@name='${AutoProduct.name}']/auto[@deploy='${currentDeploy}']/@xsltSuffix" /> 
+				<property name="template" dynamic="true" value="" />
+				<xmlpeek property="template" file="${ccnet.dir}\Product2CCNet${xsltSuffix}.xslt" xpath="/template" verbose="true" />
+				<property name="result" value="${template}" />
+			<!--/ifnot-->
+    </foreach>
+    
+    <fail message="empty result" if="${_good == '0'}" />
+    <echo message="Result is ${result}" />
+
+    <xmlpoke file="${ccnet.config}" value="${result}" xpath="/cruisecontrol" />
+
+  </target>
+</project>

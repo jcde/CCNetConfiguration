@@ -1,0 +1,127 @@
+<products>
+  <product name="Microsoft .Net Framework">
+    <version major="4" minor="0" />
+    <version major="3" minor="5" />
+    <!-- <version major="3" minor="0" /> is not supported by NAnt -->
+    <version major="2" minor="0" />
+  </product>
+  <product name="Building">
+    <version major="1" minor="0" dir="${autobuilds.dir}">
+      <auto deploy="Development" args="pro,mac" />
+      <auto deploy="Testing" args="testPC" />
+      <auto deploy="Production" args="router" />
+      <auto deploy="Kids" args="kids1" />
+    </version>
+  </product>
+  <product name="svn">
+    <version major="1" minor="0" dir="d:\data\svn">
+      <auto deploy="Production" >
+        <ccnetConfigPart>
+          <triggers>
+            <scheduleTrigger time="4:30" buildCondition="ForceBuild" />
+          </triggers>       
+        </ccnetConfigPart>
+        <targetList>
+          <target>backup</target>
+        </targetList>
+      </auto>
+    </version>
+  </product>
+  <product name="ups">
+    <version major="1" minor="0" dir="${programs86}\nut\etc" SVNdir="${autobuilds.SVNdir}/AppsConfigs/UPS/slave/suspend" >
+      <auto deploy="Host" SVNdir="${autobuilds.SVNdir}/AppsConfigs/UPS/master" >
+        <ccnetConfigPart>
+          <triggers>
+            <intervalTrigger seconds="15" buildCondition="ForceBuild" />
+          </triggers>       
+        </ccnetConfigPart>
+<!-- to run nant before svn sources getting --><projPublishers><nant>
+            <executable>${nant.location}nant.exe</executable><buildFile>${buildFile}</buildFile>
+        </nant></projPublishers>
+	  </auto>
+      <auto deploy="Development" />
+      <auto deploy="Production" />
+      <auto deploy="Kids" SVNdir="${autobuilds.SVNdir}/AppsConfigs/UPS/slave/shutdown" />
+    </version>
+  </product>
+  <product name="icinga">
+    <version major="2" minor="0" dir="${proj.dir}\Monitoring\Icinga" >
+      <auto deploy="Production" />
+    </version>
+  </product>
+  <product name="Piwik">
+    <version major="1" minor="0" dir="${proj.dir}\Piwik" >
+      <auto deploy="Host" args="http://router/svn/VpsLogs" >
+        <ccnetConfigPart>
+          <triggers>
+            <intervalTrigger seconds="7200" buildConKidson="ForceBuild" /><!--2 hours-->
+          </triggers>       
+        </ccnetConfigPart>
+        <targetList><target>get</target></targetList>
+      </auto>
+      <auto deploy="Production" args="http://router/svn/VpsLogs" >
+        <ccnetConfigPart>
+          <triggers>
+            <intervalTrigger seconds="3600" buildConKidson="ForceBuild" />
+          </triggers>       
+        </ccnetConfigPart>
+        <targetList><target>get</target><target>parse</target></targetList>
+      </auto>
+    </version>
+  </product>
+  <product name="Apache.Web">
+    <version major="2" minor="2" dir="${programs86}\Apache Software Foundation\Apache2.2" 
+        SVNdir="${autobuilds.SVNdir}/AppsConfigs/Program Files/${currentDeploy}/Apache Software Foundation/Apache2.2"
+        username="${SVNusername}"
+        password="${SVNpassword}" >
+      <auto deploy="Production" >
+        <afterLogMove program="${AutoProduct.dir}\bin\httpd.exe" args="-k restart" />
+        <log path="logs\paccess.log" />
+      </auto>
+      <auto deploy="Vps" >
+        <afterLogMove program="${AutoProduct.dir}\bin\httpd.exe" args="-k restart" />
+        <log path="logs\paccess.log" />
+        <log path="logs\ssl_access.log" />
+      </auto>
+    </version>
+    <version major="2" minor="4" dir="${programs86}\Apache Software Foundation\Apache24" 
+        SVNdir="${autobuilds.SVNdir}/AppsConfigs/Program Files/${currentDeploy}/Apache Software Foundation/Apache24"
+        username="${SVNusername}"
+        password="${SVNpassword}" >
+      <auto deploy="Host" >
+        <afterLogMove program="${AutoProduct.dir}\bin\httpd.exe" args="-k restart" />
+        <log path="logs\paccess.log" />
+        <log path="logs\ssl_access.log" />
+      </auto>
+    </version>
+  </product>
+  <product name="Wiki">
+    <version major="1" minor="20" dir="${proj.dir}\Personal\wiki">
+      <auto deploy="Production">
+        <ccnetConfigPart>
+          <triggers>
+    			  <scheduleTrigger time="8:30" buildConKidson="ForceBuild" >
+              <weekDays>
+                  <weekDay>Sunday</weekDay>
+              </weekDays>
+            </scheduleTrigger>
+          </triggers>       
+        </ccnetConfigPart>
+      </auto>
+    </version>
+  </product>
+  <product name="InternetRouter">
+    <version major="1" minor="0" dir="${proj.dir}\InternetRouter">
+      <auto deploy="Development" args="rasdial provider mobile internet;rasdial provider2 mobile internet"> 
+        <ccnetConfigPart>
+          <triggers>
+            <intervalTrigger seconds="300" buildConKidson="ForceBuild" />
+          </triggers>       
+        </ccnetConfigPart>
+<!-- to run nant before svn sources getting --><projPublishers><nant>
+            <executable>${nant.location}nant.exe</executable><buildFile>${buildFile}</buildFile>
+        </nant></projPublishers>
+      </auto>
+    </version>
+  </product>
+</products>

@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<project>
+<!-- Subversion SVN must be installed -->
+	<target name="export" depends="build" >
+		<property name="destPath" value="${tags.dir}\${product.nameVersion}" />
+		
+		<mkdir dir="${destPath}" />
+		<delete >
+			<fileset basedir="${destPath}">
+			        <include name="**/*" />
+			</fileset>
+		</delete>
+
+		<exec 	program="svn" 
+			commandline='export --force "${product.dir}" "${destPath}\src"' />
+
+		<copy 	todir="${destPath}\bin">
+		    <fileset basedir="${output.dir}">
+		        <include name="**" />
+		    </fileset>
+		</copy>
+
+	  	<call 	if="${target::exists('exportAfter')}" 
+			target="exportAfter" />
+	</target>
+
+	<target name="setupCreate" depends="init" >
+		<property name="destPath" value="${tags.dir}\${version3}" />
+		
+		<mkdir dir="${destPath}" />
+
+		<property name="projName" value="${product.name}.Setup" />
+		<exec commandline="&quot;${sln.file}&quot; /project ${product.name}.Setup /build ${project.config} /out output.log "
+				program="${devenv2008.exe}" />
+
+		<copy 	file="${projName}\${project.config}\${product.name}.msi" 
+			tofile="${destPath}\${product.name}_${version3short}.msi"
+			overwrite="true" />
+
+	  	<call 	if="${target::exists('setupCreateAfter')}" 
+			target="setupCreateAfter" />
+	</target>
+          
+</project>

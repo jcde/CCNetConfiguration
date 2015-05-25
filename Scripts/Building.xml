@@ -1,0 +1,199 @@
+<?xml version="1.0"?>
+<project>
+<!-- Visual Studio 2008 must be installed -->
+  <!--property name="devenv2008.exe" value="${programs86}\Microsoft Visual Studio 9.0\Common7\IDE\devenv.exe" /-->
+  <property name="devenv2008.exe" value="${string::replace(environment::get-variable('VS90COMNTOOLS'),'Tools\','IDE\devenv.exe')}" 
+            if="${environment::variable-exists('VS90COMNTOOLS')}" />
+<!-- gzip must be installed -->
+  <property name="gzip.exe" value="${programs86}\gnuwin32\bin\zip.exe" />
+
+  <target name="run" depends="build" >
+    <!-- every Web-project and exe-project will be started -->
+	  <property name="targetInside" value="runExecInside" />
+	  <call target="everyWebExeOutside" />
+  </target>
+
+  <!-- input properties 'program' and 'commandline' -->
+  <target name="runExecInside" >
+ 	  <exec program="${program}" commandline="${commandline}" />
+  </target>
+
+  <!-- input properties 'webCount' -->
+  <target name="WebCountInside" >
+	  <property name="webCount" value="${int::parse(webCount) +1}" />
+  </target>
+
+  <!-- web projects may describe the target 'buildOther' -->
+  <!-- web projects may describe the target 'buildBefore' -->
+  <!-- web projects may describe the target 'buildAfter' -->
+	<target name="build" depends="init" >
+<if test="${string::get-length(sln.file) > 0}" >
+		<mkdir dir="${output.dir}" if="${not directory::exists(output.dir)}" />
+		<delete>
+			<fileset basedir="${output.dir}">
+			        <include name="**/*" />
+			</fileset>
+		</delete>
+
+
+	  	<call 	if="${target::exists('buildBefore')}" 
+			target="buildBefore" />
+
+	  	<call 	if="${target::exists('buildOther')}" 
+			target="buildOther" />
+    
+		<if test="${ not target::exists('buildOther') and (property::exists('dotNetVersionMajor') and dotNetVersionMajor=='1') }" >
+			<property name="webCount" value="0" />
+			<property name="targetInside" value="WebCountInside" />
+			<call target="everyWebExeOutside" />
+
+      <solution if="${webCount!='1'}" 
+				configuration="${project.config}" solutionfile="${sln.file}"
+				outputdir = "${output.dir}" />
+			<solution if="${webCount=='1'}" 
+				configuration="${project.config}" solutionfile="${sln.file}"
+				outputdir = "${output.dir}" >
+				<webmap>
+				        <map 	url="http://localhost/${product.name}.Web/${product.name}.Web.csproj" 
+						path="${build.dir}\${product.name}.Web\${product.name}.Web.csproj" />
+				</webmap>
+			</solution>
+			<copy todir="${web.dir}\bin" if="${webCount=='1'}" failonerror="false" >
+				<fileset basedir="${output.dir}">
+					<include name="**/*" />
+				</fileset>
+			</copy>
+		</if>
+
+		<if test="${ not target::exists('buildOther') and (not property::exists('dotNetVersionMajor') or (property::exists('dotNetVersionMajor') and (dotNetVersionMajor=='2' or dotNetVersionMajor=='3'))) }">
+			<delete if="${file::exists(product.dir+'\output.log')}"
+				file="${product.dir}\output.log" />
+			<echo>${sln.file}</echo>
+			<property name="res" value="0" />
+      <!-- rem MSBuild does not support vbproj files >
+      <exec program="${scripts.dir}\build.bat" commandline="${project.config} &quot;${sln.file}&quot;" workingdir="${build.dir}"
+        resultproperty="res" failonerror="false" /-->
+ 			<exec commandline="&quot;${sln.file}&quot; /build ${project.config} /out output.log "
+				program="${devenv2008.exe}" resultproperty="res" failonerror="false" />
+			<if test="${res != '0'}" >
+				<loadfile file="output.log" property="outputlog" />
+				<fail message="${outputlog}" />
+			</if>
+			<if test="${project.config != productset.name}" >
+	 			<echo>devenv.exe cannot set specific output dir</echo>
+ 				<copy todir="${output.dir}" overwrite="true" >
+					<fileset basedir="${bin.dir}\${project.config}">
+						<include name="**\*" />
+					</fileset>
+				</copy>			
+			</if>
+
+ 			<!-- gather all dll files in output folders -->
+ 			<copy todir="${output.dir}" flatten="true" if="${property::exists('dotNetVersionMajor')}" >
+				<fileset basedir="${product.dir}">
+					<include name="\**\bin\${project.config}\*.exe" />
+					<include name="\**\bin\${project.config}\*.dll" />
+					<include name="\**\bin\${project.config}\*.bat" />
+					<include name="\**\bin\${project.config}\**" if="${project.config=='Debug' }" />
+				</fileset>
+			</copy>
+
+ 			<!-- gather all dll files in output folders for C++ -->
+ 			<copy todir="${output.dir}" flatten="true" if="${not property::exists('dotNetVersionMajor')}" >
+				<fileset basedir="${product.dir}">
+					<include name="\**\${project.config}\*.exe" />
+					<include name="\**\${project.config}\*.dll" />
+				</fileset>
+			</copy>
+		</if>
+
+		<delete if="${file::exists(output.dir+'\PostBuildEvent.bat')}"
+			file="${output.dir}\PostBuildEvent.bat" />
+
+<!-- unneeded in VS2008 
+		<call target="CompileStrings" cascade="false" if="${target::exists('CompileStrings')}" /> -->
+		<foreach item="String" delim="," in="uk,ru,en" property="lang">
+ 			<copy todir="${output.dir}\${lang}" flatten="true" >
+				<fileset basedir="${product.dir}">
+					<include name="\**\bin\${project.config}\${lang}\*.resources.dll" />
+				</fileset>
+			</copy>
+		</foreach>
+
+<!-- not every project needs this
+		<call target="dbScriptsCreate" cascade="false" if="${target::exists('dbScriptsCreate')}" />
+-->
+
+		<call if="${target::exists('buildAfter')}" target="buildAfter" />
+</if>
+  </target>
+
+	<target name="buildModels" depends="init" >
+		<delete dir="${output.dir}" failonerror="false" />
+		<copy todir="${output.dir}" flatten="true" >
+			<fileset>
+		        	<include name="**/*.mdx" />
+			</fileset>
+		</copy>
+|	</target>
+
+	<target name="debug" >
+		<property name="project.config" value="Debug" />
+		<call target="build" cascade="false" />
+		<copy todir="${output.dir}" >
+			<fileset basedir="${product.dir}\bin\ModelsAssembly">
+				<include name="**/*.mdx" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="release" >
+		<property name="project.config" value="Release" />
+		<call target="build" />
+	</target>
+
+ <!-- input properties 'targetInside' -->
+  <target name="everyWebExeOutside" >
+	<property name="y" value="" />
+    <foreach item="Line" in="${sln.file}" delim="=" property="x,y">
+      <if test="${string::get-length(y)>0}" >
+        <property name="prI" value="${string::index-of(y, ',')}" />
+        <if test="${int::parse(prI)>0}" >
+          <property name="prName" value="${string::substring(y,2,int::parse(prI)-3)}" />
+          <echo>Name: ${prName}</echo>
+          <property name="slast" value="${string::last-index-of(y, ',')}" />
+          <property name="prPath" value="${string::substring(y,int::parse(prI)+3,int::parse(slast)-int::parse(prI)-4)}" />
+          <echo>Path: ${prPath}</echo>
+          <property name="s" value="${string::index-of(y, 'http://')}" />
+          <if test="${int::parse(s)>0}" >
+		<property name="program" value="explorer" />
+		<property name="commandline" value="${string::substring(prPath,0,string::last-index-of(prPath,'/'))}" />
+		<call target="${targetInside}" />
+          </if>
+          <if test="${not (int::parse(s)>0)}" >
+            <xmlpeek property="prType" file="${product.dir}\${prPath}" xpath="//x:OutputType" failonerror="false" 
+		if="${dotNetVersionMajor=='2' or dotNetVersionMajor=='3'}" >
+              <namespaces>
+                <namespace prefix="x" uri="http://schemas.microsoft.com/developer/msbuild/2003" />
+              </namespaces>
+            </xmlpeek>
+            <xmlpeek property="prType" file="${product.dir}\${prPath}" xpath="//Settings/@OutputType" failonerror="false" if="${dotNetVersionMajor=='1'}" />
+            <xmlpeek property="prFile" file="${product.dir}\${prPath}" xpath="//x:AssemblyName"  failonerror="false" if="${dotNetVersionMajor=='2'or dotNetVersionMajor=='3'}" >
+              <namespaces>
+                <namespace prefix="x" uri="http://schemas.microsoft.com/developer/msbuild/2003" />
+              </namespaces>
+            </xmlpeek>
+            <xmlpeek property="prFile" file="${product.dir}\${prPath}" xpath="//Settings/@AssemblyName" failonerror="false" if="${dotNetVersionMajor=='1'}" />
+
+            <if test="${property::exists('prType') and (prType=='WinExe' or prType=='Exe')}" >
+			<property name="program" value="${output.dir}\${prFile}.exe" />
+			<property name="commandline" value="" />
+			<call target="${targetInside}" />
+            </if>
+          </if>
+        </if>
+      </if>
+    </foreach>
+  </target>
+  
+</project>

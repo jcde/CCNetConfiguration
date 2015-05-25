@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<project>
+
+	<target name="CompileStrings" depends="init" >
+	
+		<foreach item="File" property="filename">
+			<in>
+				<items>
+					<include name="**\*.strings" />
+				</items>
+			</in>
+			<do>
+				<property name="sfile" value="${path::get-file-name(filename)}" />
+				
+				<pathabsolute2relative relativePathProp="result" absPath="${filename}" baseDir="${product.dir}" />
+				<property name="result" value="${string::replace(result,'..\','')}" />
+				<property name="dllnameWithoutExt"
+					value="${string::substring(result,0,string::index-of(result,'\'))}"
+					if="${string::index-of(result,'\') != -1}" />
+				<property name="dllnameWithoutExt"
+					value="${product.name}"
+					if="${string::index-of(result,'\') == -1}" />
+				<echo>${dllnameWithoutExt}, ${sfile}</echo>
+
+				<if test="${string::get-length(sfile) > 11}" >
+					<property name="culture" value="${string::substring(sfile,3,string::get-length(sfile)-11)}" />
+					<copy file="${filename}" tofile="${output.dir}\${culture}\SR.${culture}.txt" />
+					<resgen input="${output.dir}\${culture}\SR.${culture}.txt"
+							output="${output.dir}\${culture}\${dllnameWithoutExt}.SR.${culture}.resources" >
+					</resgen>
+
+					<al output="${output.dir}\${culture}\${dllnameWithoutExt}.resources.dll" target="lib" culture="${culture}" 
+						template="${output.dir}\${dllnameWithoutExt}.dll" delaysign="True" keyfile="${config.dir}\Keys\delaysign.snk" >
+						<sources basedir="${output.dir}\${culture}" > 
+							<include name="${dllnameWithoutExt}.SR.${culture}.resources" />
+						</sources>
+					</al> 
+					<delete file="${output.dir}\${culture}\SR.${culture}.txt" />
+					<delete file="${output.dir}\${culture}\${dllnameWithoutExt}.SR.${culture}.resources" />
+
+				
+					<copy todir="${web.dir}\bin\${culture}" if="${directory::exists(web.dir)}" >
+						<fileset basedir="${output.dir}\${culture}">
+							<include name="**/*" />
+						</fileset>
+					</copy>
+         			</if>
+			</do>
+		</foreach>
+	</target>
+
+</project>

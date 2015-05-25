@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<project default="build">
+	<property name="autobuilds.SVNdir" value="http://router/svn/AutoBuilds" />
+	<property name="SVNusername" value="read" />
+	<property name="SVNpassword" value="er456_" />
+
+	<property name="deployProductNamePrefix" value="<your name>_" />
+
+  <property name="ccnetConfigPart" value="
+    &lt;triggers&gt;
+			&lt;intervalTrigger seconds='30' /&gt; 
+		&lt;/triggers&gt;" />
+
+	<property name="ccnetPerm" value="" />
+  <property name="ccnetNantConfigPart" value="
+		&lt;buildTimeoutSeconds&gt;6000&lt;/buildTimeoutSeconds&gt;
+	" />	
+  <property name="ccPort" value="21234" />
+
+ 	<property name="project.config" value="Release" />
+
+	<property name="backup.dir" value="c:\cd\Backups" />
+
+	<include buildfile="${ path::combine(	path::get-directory-name( environment::get-variable('currentDeploy') ),
+						'Scripts\FoldersStructure.xml') }" />
+
+	<include buildfile="${ path::combine(	path::get-directory-name( environment::get-variable('currentDeploy') ),
+						'Scripts\ProductInstalling.xml') }" />
+
+	<include buildfile="${ path::combine(	path::get-directory-name( environment::get-variable('currentDeploy') ),
+						'Scripts\Databases.xml') }" />
+
+	<include buildfile="${ path::combine(	path::get-directory-name( environment::get-variable('currentDeploy') ),
+						'Scripts\Building.xml') }" />
+
+	<include buildfile="${ path::combine(	path::get-directory-name( environment::get-variable('currentDeploy') ),
+						'Scripts\Release.xml') }" />
+
+	<include buildfile="${ path::combine(	path::get-directory-name( environment::get-variable('currentDeploy') ),
+						'Scripts\Resources.xml') }" />
+
+</project>
