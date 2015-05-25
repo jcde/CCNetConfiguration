@@ -20,4 +20,4 @@ Note. The product "Building" lists all envirounments and workstations that belon
 ** for example, svn.exe must be accessible in command line by PATH, its binaries are in "c:\Program Files\Apache Software Foundation\Apache2.2\bin\.." 
 * run ${config.dir}\CCNet\CCNet2Environment.build.bat
 * run ${config.dir}\CCNet\CCNetService.build
-changed Login User for CCService to a and started it and open firewall for it
+** chang Login User for Windows service of CCService to needed user, start it and open firewall for it if needed
