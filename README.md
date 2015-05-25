@@ -13,11 +13,11 @@ Note. The product "Building" lists all envirounments and workstations that belon
 
 = Environment installation =
 * select AutoBuilds folder that will be called ${autobuilds.dir}
-* chechout https://github.com/jcde/CCNetConfiguration/trunk into ${autobuilds.dir}\CCNetConfiguration folder
-* get <environment>.xml from someone or make it by yourselves
-* run Sources\Configuration\DeployEnvironments\setCurrentDeploy.vbs <environment>.xml and logoff/logon
-* maybe modify and maybe run Sources\Configuration\DeployEnvironments\setPath.bat
+* chechout https://github.com/jcde/CCNetConfiguration/trunk into ${autobuilds.dir}\CCNetConfiguration folder (called ${config.dir})
+* get _environment_.xml from someone or make it by yourselves and put it in ${config.dir}
+* run ${config.dir}\setCurrentDeploy.vbs <environment>.xml and logoff/logon
+* maybe modify and maybe run ${config.dir}\setPath.bat
 ** for example, svn.exe must be accessible in command line by PATH, its binaries are in "c:\Program Files\Apache Software Foundation\Apache2.2\bin\.." 
-* run Sources\Configuration\DeployEnvironments\CCNet\CCNet2Environment.build.bat
-* run Sources\Configuration\DeployEnvironments\CCNet\CCNetService.build
+* run ${config.dir}\CCNet\CCNet2Environment.build.bat
+* run ${config.dir}\CCNet\CCNetService.build
 changed Login User for CCService to a and started it and open firewall for it
