@@ -22,3 +22,7 @@ Note. The product "Building" lists all envirounments and workstations that belon
 * run ${config.dir}\CCNet\CCNet2Environment.build.bat
 * run ${config.dir}\CCNet\CCNetService.build
 ** chang Login User for Windows service of CCService to needed user, start it and open firewall for it if needed
+
+
+= TFS notes =
+Working folder should have mapping done from Visual Studio. Workspaces may be used to map the same TFS folder to different working foldrs.
