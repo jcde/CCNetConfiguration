@@ -1,1 +1,1 @@
-nant -buildfile:CCNet2Environment.build > 1
+nant -buildfile:CCNet2Environment.build > CCNetConfig.log

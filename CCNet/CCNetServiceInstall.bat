@@ -1,0 +1,1 @@
+nant -buildfile:CCNetService.build > CCNetServiceInstall.log

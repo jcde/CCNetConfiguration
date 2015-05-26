@@ -6,7 +6,7 @@
   <property name="ccnet.dir" value="${config.dir}\CCNet" /> 
   <property name="ccnet.mainconfig.dir" value="${ccnet.dir}\ccnet.configs" /> 
   <property name="ccnet.binIni.dir" value="${ccnet.mainconfig.dir}\bin" /> 
-  <property name="ccnet.config.dir" value="${ccnet.mainconfig.dir}\${currentDeploy}" /> 
+  <property name="ccnet.config.dir" value="${autobuilds.dir}\${currentDeploy}" /> 
   <property name="ccnet.config" value="${ccnet.config.dir}\ccnet.config" /> 
 
 <!-- Adding new project element for the every product/version[./auto/@deploy='${currentDeploy}'] -->
@@ -62,7 +62,7 @@
 				<mkdir dir="${workingDirectory}" />
 
 				<property name="sourceType" value="svn" />
-				<property name="sscpart" value="&lt;trunkUrl&gt;${trunkUrl}&lt;/trunkUrl&gt;" dynamic="true" />
+				<property name="sscpart" value="&lt;executable&gt;${svn.exe}&lt;/executable&gt;&lt;trunkUrl&gt;${trunkUrl}&lt;/trunkUrl&gt;" dynamic="true" />
 				<property name="AutoProduct.SVNdir" value="" dynamic="true" />
 				<property name="_username" value="${username}" dynamic="true" />
 				<property name="_password" value="${password}" dynamic="true" />
@@ -90,9 +90,10 @@
 					<xmlpeek property="AutoProduct.TFSdir" file="${Products.xml}" failonerror="false"
 						xpath="/products/product/version[../@name='${AutoProduct.name}'][auto/@deploy='${currentDeploy}']/@TFSdir" /> 
 					<if test="${string::get-length(AutoProduct.TFSdir) > 0}" >
-						<property name="sscpart" value="&lt;server&gt;${TFSserver}&lt;/server&gt;&lt;project&gt;${AutoProduct.TFSdir}&lt;/project&gt;&lt;domain&gt;${domain}&lt;/domain&gt;&lt;workspace&gt;CCNET&lt;/workspace&gt;" />
+						<property name="sscpart" value="&lt;server&gt;${TFSserver}&lt;/server&gt;&lt;project&gt;${AutoProduct.TFSdir}&lt;/project&gt;&lt;domain&gt;${TFSdomain}&lt;/domain&gt;&lt;workspace&gt;CC_NET&lt;/workspace&gt;" />
 						<property name="sourceType" value="vsts" />
-						<echo>!!!!TFSpart${sscpart}</echo>
+						<property name="_username" value="${TFSusername}" failonerror="false" /> 
+						<property name="_password" value="${TFSpassword}" failonerror="false" /> 
 					</if>
 					<ifnot test="${string::get-length(AutoProduct.TFSdir) > 0}" >
 						<property name="autobuilds.dirD" value="${autobuilds.dir}" /> 
