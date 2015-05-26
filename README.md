@@ -25,4 +25,5 @@ Note. The product "Building" lists all envirounments and workstations that belon
 
 
 = TFS notes =
+* Used CC_NET workspace by default.
 * Working folder should have mapping done from Visual Studio. Workspaces may be used to map the same TFS folder to different working foldrs.
