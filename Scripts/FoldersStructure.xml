@@ -14,6 +14,7 @@
 	<property name="config.dir"  value="${autobuilds.dir}\CCNetConfiguration" />
 	<property name="scripts.dir" value="${config.dir}\Scripts" /> 
 	<property name="proj.dir" value="${sources.dir}\Projects" />
+	<property name="ccnet.config.dir" value="${autobuilds.dir}\${currentDeploy}" /> 
 	<property name="core.dir"  value="${proj.dir}\Core" />
 	<property name="core.framework.dir"  value="${sources.dir}\Framework" />
 	<!--property name="core.framework.dir"  value="${ string::substring(core.dir, 0, string::last-index-of(core.dir, '\')) }\Framework" /-->

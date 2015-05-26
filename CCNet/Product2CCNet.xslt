@@ -20,12 +20,7 @@
 			<cleanCopy>false</cleanCopy>
 		</sourcecontrol>
 		<tasks>
-			<nant>
-				<executable>${nant.location}nant.exe</executable>
-				<buildFile>${buildFile}</buildFile>
-				<targetList>${targetList}</targetList>
-				${ccnetNantConfigPart}
-			</nant>
+			${ccnetTasks}
 		</tasks>
 		<publishers>
 		  ${projPublishers}
