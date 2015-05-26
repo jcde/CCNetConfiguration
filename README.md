@@ -8,7 +8,7 @@ Note. The product "Building" lists all envirounments and workstations that belon
 
 = Prerequisites =
 * Nant 0.92
-* TortoiseSVN
+* TortoiseSVN with "command line client tools" installed
 * CruiseControl.NET-1.8.5.0-Setup.exe may install web dashboard
 * http://switch.dl.sourceforge.net/project/gnuwin32/zip/3.0/zip-3.0-setup.exe for zipping
 
