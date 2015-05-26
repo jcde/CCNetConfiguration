@@ -21,9 +21,9 @@ Note. The product "Building" lists all envirounments and workstations that belon
 ** for example, svn.exe must be accessible in command line by PATH, its binaries are in "c:\Program Files\Apache Software Foundation\Apache2.2\bin\.." 
 * run ${config.dir}\CCNet\CCNet2Environment.build.bat
 * run ${config.dir}\CCNet\CCNetServiceInstall.bat as Administrator
-** change Login User for Windows service of CCService_environment_ to needed user, start it and open firewall for it if needed
+** change Log On User for Windows service of CCService_environment_ to user with access to sources, start it and open firewall for it if needed
 
 
 = TFS notes =
 * Used CC_NET workspace by default.
-* Working folder should have mapping done from Visual Studio. Workspaces may be used to map the same TFS folder to different working foldrs.
+* Working folder may be mapped to only one workspace and such mapping is done in Visual Studio or first time by cruisecontrol. 
