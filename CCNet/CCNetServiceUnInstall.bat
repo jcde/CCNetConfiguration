@@ -1,0 +1,1 @@
+nant -buildfile:CCNetService.build CCServiceUnInstall > CCNetServiceUnInstall.log
