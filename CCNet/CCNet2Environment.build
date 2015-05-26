@@ -152,7 +152,7 @@
 			<xmlpeek property="msbuild" file="${Products.xml}" failonerror="false"
 				xpath="/products/product/version[../@name='${AutoProduct.name}'][auto/@deploy='${currentDeploy}']/@msbuild" /> 
 			<if test="${string::get-length(msbuild) > 0}" >
-				<property name="MSBuildProjectDir" value="${path::get-directory-name(msbuild)}" /> 
+				<property name="MSBuildProjectDir" value="${workingDirectory}\${path::get-directory-name(msbuild)}" /> 
 				<property name="MSBuildProjectFile" value="${path::get-file-name(msbuild)}" /> 
 				<property name="ccnetTasks" value="
 				  &lt;msbuild&gt;

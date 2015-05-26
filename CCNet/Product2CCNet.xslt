@@ -11,7 +11,8 @@
 		  </permissions>
 		</security-->     
 		<webURL>http://router/ccnet/server/${environment::get-machine-name()}/project/${AutoProduct.name}/ViewLatestBuildReport.aspx</webURL>
-		<!--sourcecontrol autoGetSource="true" applyLabel="true"-->
+		<!--<labeller type="dateLabeller"/>
+			sourcecontrol autoGetSource="true" applyLabel="true"-->
  	    <sourcecontrol type="${sourceType}" autoGetSource="true" >
 			${sscpart}
 			<username>${_username}</username>
