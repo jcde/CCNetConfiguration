@@ -1,0 +1,3 @@
+<project>
+	<include buildfile="${environment::get-variable('currentDeploy')}" />
+</project>
