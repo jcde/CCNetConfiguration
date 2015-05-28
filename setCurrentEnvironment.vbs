@@ -41,6 +41,4 @@ End Select
 strDeploy = objShell.RegRead("HKCU\Environment\currentDeploy")
 
 wscript.echo "Building environment marked in the windows environment variable 'currentDeploy' is " & strDeploy & _
-		"  Subversion SVN has to be reachable by PATH windows environment variable."
-rem		".     You have to restart PC or to fulfill Logoff\Logon. " & _
-
+		".     You have to restart PC or to fulfill Logoff\Logon. "
