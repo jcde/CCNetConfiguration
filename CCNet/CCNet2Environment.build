@@ -89,7 +89,7 @@
 				<xmlpeek property="AutoProduct.TFSdir" file="${Products.xml}" failonerror="false"
 					xpath="/products/product/version[../@name='${AutoProduct.name}'][auto/@deploy='${currentDeploy}']/@TFSdir" /> 
 				<if test="${string::get-length(AutoProduct.TFSdir) > 0}" >
-					<property name="sscpart" value="&lt;server&gt;${TFSserver}&lt;/server&gt;&lt;project&gt;${AutoProduct.TFSdir}&lt;/project&gt;&lt;domain&gt;${TFSdomain}&lt;/domain&gt;&lt;workspace&gt;CCNET_${environment::get-machine-name()}&lt;/workspace&gt;" />
+					<property name="sscpart" value="&lt;server&gt;${TFSserver}&lt;/server&gt;&lt;project&gt;${AutoProduct.TFSdir}&lt;/project&gt;&lt;domain&gt;${TFSdomain}&lt;/domain&gt;&lt;workspace&gt;CCNET_${environment::get-machine-name()_environment::get-user-name()}&lt;/workspace&gt;" />
 					<property name="sourceType" value="vsts" />
 					<property name="_username" value="${TFSusername}" failonerror="false" /> 
 					<property name="_password" value="${TFSpassword}" failonerror="false" /> 
