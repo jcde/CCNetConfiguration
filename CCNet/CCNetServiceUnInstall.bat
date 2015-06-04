@@ -1,1 +1,2 @@
-nant -buildfile:CCNetService.build CCServiceUnInstall > CCNetServiceUnInstall.log
+nant -buildfile:%0%\..\CCNetService.build CCServiceUnInstall 
+rem -l:CCNetServiceUnInstall.log
