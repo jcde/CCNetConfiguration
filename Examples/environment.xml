@@ -4,18 +4,19 @@
 	<property name="SVNusername" value="read" />
 	<property name="SVNpassword" value="er456_" />
 
+	<property name="webURLtemplate" value="ccnet/server/local" /> 		
 	<property name="deployProductNamePrefix" value="<your name>_" />
 
-  <property name="ccnetConfigPart" value="
+	<property name="ccnetConfigPart" value="
     &lt;triggers&gt;
 			&lt;intervalTrigger seconds='30' /&gt; 
 		&lt;/triggers&gt;" />
 
 	<property name="ccnetPerm" value="" />
-  <property name="ccnetNantConfigPart" value="
+	<property name="ccnetNantConfigPart" value="
 		&lt;buildTimeoutSeconds&gt;6000&lt;/buildTimeoutSeconds&gt;
 	" />	
-  <property name="ccPort" value="21234" />
+	<property name="ccPort" value="21234" />
 
  	<property name="project.config" value="Release" />
 
