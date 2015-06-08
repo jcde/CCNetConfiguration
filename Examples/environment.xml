@@ -4,7 +4,7 @@
 	<property name="SVNusername" value="read" />
 	<property name="SVNpassword" value="er456_" />
 
-	<property name="webURLtemplate" value="ccnet/server/local" /> 		
+	<property name="webURLtemplate" value="/ccnet/server/local" /> 		
 	<property name="deployProductNamePrefix" value="<your name>_" />
 
 	<property name="ccnetConfigPart" value="
