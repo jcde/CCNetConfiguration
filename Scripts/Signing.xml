@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<project default="sign">
+
+	<target name="sign" >
+		<!--property name="productset.name" value="Signed" readonly="true" />
+		<call target="release" /-->
+
+		<delay-sign keyfile="${numsite.dir}\Keys\numsite.private.key" verbose="True" failonerror="false" >
+		    <targets basedir="${output.dir}" >
+		        <include name="*.dll" />
+		        <include name="*.exe" />
+		    </targets>
+		</delay-sign>
+	</target>
+
+</project>
