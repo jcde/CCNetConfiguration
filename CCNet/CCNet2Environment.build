@@ -98,9 +98,11 @@
 					<property name="autobuilds.dirD" value="${autobuilds.dir}" /> 
 					<if test="${string::ends-with(autobuilds.dir,':\')}" >
 						<property name="trunkUrl" value="${string::replace(string::replace(AutoProduct.dir.dynamic,sources.dir,autobuilds.SVNdir+'/Sources'),'\','/')}" /> 
+						<echo>?${trunkUrl}</echo>
 					</if>
 					<ifnot test="${string::ends-with(autobuilds.dir,':\')}" >
-						<property name="trunkUrl" value="${string::replace(string::replace(AutoProduct.dir.dynamic,autobuilds.dir,autobuilds.SVNdir),'\','/')}" /> 
+						<property name="trunkUrl" value="${string::replace(string::replace(AutoProduct.dir.dynamic,autobuilds.dir,autobuilds.SVNdir+'/Sources/AutoBuilds'),'\','/')}" /> 
+						<echo>??${trunkUrl}</echo>
 					</ifnot>
 				</ifnot>
 			</ifnot>
