@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project>
-  <property name="zipPassword" value="" />
+  <!-- put property name="zipPassword" value="" / into currentDeploy.xml -->
 
   <target name="dbInit" depends="installinit" >
     <property name="dbs.dir" value="${product.config.dir}\Databases" />
