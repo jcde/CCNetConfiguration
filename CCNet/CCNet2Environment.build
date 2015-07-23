@@ -52,6 +52,7 @@
 			<property name="prodDescription" value="" dynamic="true" />
 			<xmlpeek property="prodDescription" file="${Products.xml}" failonerror="false"
 				xpath="/products/product[./@name='${AutoProduct.name}'][./version/auto/@deploy='${currentDeploy}']/description" /> 
+				
 
 			<property name="projPublishers" value="" dynamic="true" />
 			<xmlpeek property="projPublishers" file="${Products.xml}" failonerror="false"
