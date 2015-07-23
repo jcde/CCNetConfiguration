@@ -3,6 +3,7 @@
   ${result}
   <project>
 		<name>${AutoProduct.name}</name> 
+		<description>${prodDescription}</description>
 		${projccnetConfigPart}
 		<!--security type="defaultProjectSecurity" guest="guest" >
 		  <permissions>     
