@@ -83,7 +83,6 @@
     <property name="sln.file" value="${path::get-file-name-without-extension( project::get-buildfile-uri() )}" />
 	<if test="${file::exists(sln.file+'.sln')}" >
 		<property name="sln.file" value="${sln.file}.sln" />
-		<property name="product.name" value="${path::get-file-name-without-extension( sln.file )}" />
 	</if>
 		<property name="pnl" value="${string::get-length(product.name) + 1}" />
 		<property name="slnIndex" value="${string::index-of(build.file, '.sln')}" />
