@@ -81,8 +81,10 @@
     </copy>
 
     <property name="sln.file" value="${path::get-file-name-without-extension( project::get-buildfile-uri() )}" />
-		<property name="sln.file" value="${sln.file}.sln" if="${file::exists(sln.file+'.sln')}" />
-
+	<if test="${file::exists(sln.file+'.sln')}" >
+		<property name="sln.file" value="${sln.file}.sln" />
+		<property name="product.name" value="${path::get-file-name-without-extension( sln.file )}" />
+	</if>
 		<property name="pnl" value="${string::get-length(product.name) + 1}" />
 		<property name="slnIndex" value="${string::index-of(build.file, '.sln')}" />
 		<if test="${int::parse(slnIndex) > int::parse(pnl)}" >
@@ -101,7 +103,6 @@
 				<property name="productset.name" value="${project.config}" />
 			</if>
 		</if>
-
 	<property name="version" value="${product.version.major}.${product.version.minor}.${product.version.build}.${product.version.revision}" failonerror="false"/>
 	<property name="version3" value="${product.version.major}.${product.version.minor}.${product.version.build}" failonerror="false"/>
 	<property name="version3short" value="${product.version.major}${product.version.minor}${product.version.build}" failonerror="false"/>
@@ -112,10 +113,9 @@
 	<if test="${not (string::get-length(productNameRegistered)>0)}" >
 		<fail message="Register product in '${Products.xml}'" />
 	</if>
- 	<property name="product.nameVersion" 
-        		value="${product.name}.${productset.name}_${product.version.major}_${product.version.minor}_${product.version.build}" failonerror="false"/>
-
+ 	<property name="product.nameVersion" failonerror="false" 
+			  value="${product.name}.${productset.name}_${product.version.major}_${product.version.minor}_${product.version.build}" />
 	<property name="output.dir" value="${bin.dir}\${productset.name}" />
 
-	</target>
+</target>
 </project>
