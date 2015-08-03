@@ -25,11 +25,10 @@ if f.path = objShell.ExpandEnvironmentStrings("%windir%") + "\System32" or f.pat
 else
 	strDeploy = f.path & "\" & WScript.Arguments(0)
 end if
-wscript.echo f.path
-wscript.echo strDeploy
 Set deployFile = FSO.GetFile(strDeploy)
 
 Set scriptFolder = FSO.GetFile(WScript.ScriptFullName).ParentFolder 
+
 if not deployFile.ParentFolder = scriptFolder then
 	FSO.Copyfile strDeploy, scriptFolder & "\"
 	strDeploy = scriptFolder & "\" & deployFile.Name
@@ -38,7 +37,8 @@ end if
 Set getOSVersion = objShell.exec("%comspec% /c ver")
 version = getOSVersion.stdout.readall
 Select Case True
-   Case InStr(version, "n 5.") > 1 : 
+   Case InStr(version, " 5.") > 1 : 
+
 	rCode = objShell.RegWrite("HKCU\Environment\currentDeploy", strDeploy, "REG_SZ")
 	strDeploy = objShell.RegRead("HKCU\Environment\currentDeploy")
 	wscript.echo "Building environment marked in the windows environment variable 'currentDeploy' is " & strDeploy & _
