@@ -20,11 +20,13 @@ Dim FSO
 Set FSO = CreateObject("Scripting.FileSystemObject")
 Set f = FSO.GetFolder(".")
 
-if f.path = objShell.ExpandEnvironmentStrings("%windir%") + "\System32" then
+if f.path = objShell.ExpandEnvironmentStrings("%windir%") + "\System32" or f.path = objShell.ExpandEnvironmentStrings("%homedrive%") + objShell.ExpandEnvironmentStrings("%homepath%") then
 	strDeploy = WScript.Arguments(0)
 else
 	strDeploy = f.path & "\" & WScript.Arguments(0)
 end if
+wscript.echo f.path
+wscript.echo strDeploy
 Set deployFile = FSO.GetFile(strDeploy)
 
 Set scriptFolder = FSO.GetFile(WScript.ScriptFullName).ParentFolder 
