@@ -40,9 +40,9 @@
 		<!--ifnot test="${property::exists('i') and string::get-length(i) > 0}" -->
 			<echo message="Added project ${AutoProduct.name} into ccnet.config" />   
 
-			<xmlpeek property="major" file="${Products.xml}"
+			<xmlpeek property="major" file="${Products.xml}" failonerror="false"
 				xpath="/products/product/version[@dir='${AutoProduct.dir}']/@major" /> 
-			<xmlpeek property="minor" file="${Products.xml}"
+			<xmlpeek property="minor" file="${Products.xml}" failonerror="false"
 				xpath="/products/product/version[@dir='${AutoProduct.dir}']/@minor" /> 
 									 
 			<property name="projccnetConfigPart" value="${ccnetConfigPart}" dynamic="true" />
@@ -100,12 +100,12 @@
 					<property name="_password" value="${TFSpassword}" failonerror="false" /> 
 				</if>
 				<ifnot test="${string::get-length(AutoProduct.TFSdir) > 0}" >
-					<if test="${string::ends-with(root.dir,':\')}" >
+					<if test="${string::index-of(AutoProduct.dir.dynamic,root.dir)!=-1}" >
+						<property name="trunkUrl" value="${string::replace(string::replace(AutoProduct.dir.dynamic,root.dir,autobuilds.SVNdir),'\','/')}" /> 
+					</if>
+					<if test="${string::index-of(AutoProduct.dir.dynamic,sources.dir)!=-1}" >
 						<property name="trunkUrl" value="${string::replace(string::replace(AutoProduct.dir.dynamic,sources.dir,autobuilds.SVNdir+'/Sources'),'\','/')}" /> 
 					</if>
-					<ifnot test="${string::ends-with(root.dir,':\')}" >
-						<property name="trunkUrl" value="${string::replace(string::replace(AutoProduct.dir.dynamic,sources.dir,autobuilds.SVNdir+'/Sources'),'\','/')}" /> 
-					</ifnot>
 					<echo>??${AutoProduct.dir.dynamic}-${root.dir}-${trunkUrl}</echo>
 				</ifnot>
 			</ifnot>
