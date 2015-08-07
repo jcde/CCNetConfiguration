@@ -14,10 +14,9 @@
 	<property name="config.dir"  value="${autobuilds.dir}\CCNetConfiguration" />
 	<property name="scripts.dir" value="${config.dir}\Scripts" /> 
 	<property name="proj.dir" value="${sources.dir}\Projects" />
+	<property name="lib.dir"  value="${sources.dir}\lib" />
 	<property name="ccnet.config.dir" value="${autobuilds.dir}\${currentDeploy}" /> 
 	<property name="core.dir"  value="${proj.dir}\Core" />
-	<property name="core.framework.dir"  value="${sources.dir}\Framework" />
-	<!--property name="core.framework.dir"  value="${ string::substring(core.dir, 0, string::last-index-of(core.dir, '\')) }\Framework" /-->
 	<property name="Products.xml" value="${autobuilds.dir}\Products.xml" />
 
 	<property name="build.file" value="${path::get-file-name( project::get-buildfile-uri() )}" />
