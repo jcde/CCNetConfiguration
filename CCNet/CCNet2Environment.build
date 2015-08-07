@@ -104,7 +104,7 @@
 						<property name="trunkUrl" value="${string::replace(string::replace(AutoProduct.dir.dynamic,sources.dir,autobuilds.SVNdir+'/Sources'),'\','/')}" /> 
 					</if>
 					<ifnot test="${string::ends-with(root.dir,':\')}" >
-						<property name="trunkUrl" value="${string::replace(string::replace(AutoProduct.dir.dynamic,root.dir,autobuilds.SVNdir),'\','/')}" /> 
+						<property name="trunkUrl" value="${string::replace(string::replace(AutoProduct.dir.dynamic,sources.dir,autobuilds.SVNdir+'/Sources'),'\','/')}" /> 
 					</ifnot>
 					<echo>??${AutoProduct.dir.dynamic}-${root.dir}-${trunkUrl}</echo>
 				</ifnot>
