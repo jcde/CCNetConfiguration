@@ -65,8 +65,14 @@
 			<property name="workingDirectory" value="${AutoProduct.dir.dynamic}" /> 
 			<mkdir dir="${workingDirectory}" />
 
+			<property name="cleanCopy" value="false" />
+			<xmlpeek property="cleanCopy" file="${Products.xml}" failonerror="false"
+					xpath="/products/product/version[@dir='${AutoProduct.dir}']/auto[@deploy='${currentDeploy}']/cleanCopy" /> 
+			
 			<property name="sourceType" value="svn" />
-			<property name="sscpart" value="&lt;executable&gt;${svn.exe}&lt;/executable&gt;&lt;trunkUrl&gt;${trunkUrl}&lt;/trunkUrl&gt;" dynamic="true" />
+			<property name="sscpart" 
+			value="&lt;executable&gt;${svn.exe}&lt;/executable&gt;&lt;trunkUrl&gt;${trunkUrl}&lt;/trunkUrl&gt;&lt;cleanCopy&gt;${cleanCopy}&lt;/cleanCopy&gt;" 
+			dynamic="true" />
 			<property name="AutoProduct.SVNdir" value="" dynamic="true" />
 			<property name="_username" value="${username}" dynamic="true" />
 			<property name="_password" value="${password}" dynamic="true" />
