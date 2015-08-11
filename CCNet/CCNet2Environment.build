@@ -67,7 +67,7 @@
 
 			<property name="cleanCopy" value="false" />
 			<xmlpeek property="cleanCopy" file="${Products.xml}" failonerror="false"
-					xpath="/products/product/version[@dir='${AutoProduct.dir}']/auto[@deploy='${currentDeploy}']/cleanCopy" /> 
+					xpath="/products/product/version[../@name='${AutoProduct.name}'][auto/@deploy='${currentDeploy}']/@cleanCopy" /> 
 			
 			<property name="sourceType" value="svn" />
 			<property name="sscpart" 
