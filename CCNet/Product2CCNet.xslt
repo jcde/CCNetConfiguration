@@ -19,7 +19,6 @@
 			<username>${_username}</username>
 			<password>${_password}</password>
 			<workingDirectory>${workingDirectory}</workingDirectory>
-			<cleanCopy>false</cleanCopy>
 		</sourcecontrol>
 		<tasks>
 			${ccnetTasks}
