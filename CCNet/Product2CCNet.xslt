@@ -11,7 +11,7 @@
 			${ccnetPerm}
 		  </permissions>
 		</security-->     
-		<webURL>http://${environment::get-machine-name()}${webURLtemplate}/project/${AutoProduct.name}/ViewLatestBuildReport.aspx</webURL>
+		<webURL>http://${webURLtemplate}/project/${AutoProduct.name}/ViewLatestBuildReport.aspx</webURL>
 		<!--<labeller type="dateLabeller"/>
 			sourcecontrol autoGetSource="true" applyLabel="true"-->
  	    <sourcecontrol type="${sourceType}" autoGetSource="true" >
