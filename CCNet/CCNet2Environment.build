@@ -47,6 +47,8 @@
 			xpath="/products/product/version[@dir='${AutoProduct.dir}']/@minor" /> 
 									 
 		<property name="projccnetConfigPart" value="${ccnetConfigPart}" dynamic="true" />
+		<xmlpeek property="projccnetConfigPart" file="${Products.xml}" failonerror="false" 
+				xpath="/products/product/version[../@name='${AutoProduct.name}'][auto/@deploy='${currentDeploy}']/ccnetConfigPart" /> 
 		<xmlpeek property="projccnetConfigPart" file="${Products.xml}" failonerror="false"
 				xpath="/products/product/version[@dir='${AutoProduct.dir}']/auto[@deploy='${currentDeploy}']/ccnetConfigPart" />
 					
