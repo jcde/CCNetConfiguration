@@ -4,14 +4,14 @@
   <project>
 		<name>${AutoProduct.name}</name> 
 		<description>${prodDescription}</description>
-		${projccnetConfigPart}
+		<webURL>http://${webURLtemplate}/project/${AutoProduct.name}/ViewLatestBuildReport.aspx</webURL>
 		<!--security type="defaultProjectSecurity" guest="guest" >
 		  <permissions>     
 			${projccnetPerm}
 			${ccnetPerm}
 		  </permissions>
 		</security-->     
-		<webURL>http://${webURLtemplate}/project/${AutoProduct.name}/ViewLatestBuildReport.aspx</webURL>
+		${projccnetConfigPart}
 		${sourcecontrol}
 		<tasks>
 			${ccnetTasks}

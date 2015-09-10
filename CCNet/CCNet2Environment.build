@@ -69,7 +69,6 @@
 
 		<property name="sourcecontrol" value="" dynamic="true" />
 		<if test="${string::get-length(AutoProduct.dir) > 0}" >
-				<echo>1111${AutoProduct.dir}</echo>
 			<property name="workingDirectory" value="${AutoProduct.dir.dynamic}" /> 
 			<mkdir dir="${workingDirectory}" />
 
