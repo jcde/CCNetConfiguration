@@ -44,6 +44,10 @@
       <auto deploy="Kids" SVNdir="${autobuilds.SVNdir}/AppsConfigs/UPS/slave/shutdown" />
     </version>
   </product>
+  <product name="restart"><version>
+		<ccnetTasks><exec executable="shutdown" buildArgs="/r" /></ccnetTasks>
+		<auto deploy="Kids" />
+  </version></product>
   <product name="icinga">
     <version major="2" minor="0" dir="${proj.dir}\Monitoring\Icinga" >
       <auto deploy="Production" />
