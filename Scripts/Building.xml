@@ -69,7 +69,7 @@
 			<delete if="${file::exists(product.dir+'\output.log')}"
 				file="${product.dir}\output.log" />
 			<echo>${sln.file}</echo>
- 			<exec commandline="restore" program="nuget" workingdir="${ path::get-directory-name(sln.file) }" />
+ 			<exec commandline='restore "${sln.file}"' program="nuget" />
 			<property name="res" value="0" />
       <!-- rem MSBuild does not support vbproj files >
       <exec program="${scripts.dir}\build.bat" commandline="${project.config} &quot;${sln.file}&quot;" workingdir="${build.dir}"
