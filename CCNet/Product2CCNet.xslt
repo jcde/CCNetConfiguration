@@ -21,6 +21,7 @@
 			<merge>
 				 <files>
 					 <file>${workingDirectory}\metrics\nunit\*-results.xml</file>
+					 <file>${workingDirectory}\metrics\mstest\*results.trx</file>
 					 <file>${workingDirectory}\metrics\ncover\*.*</file>
 					 <file>${workingDirectory}\metrics\fxcop\*</file>
 					 <file>${workingDirectory}\metrics\simian.xml</file>

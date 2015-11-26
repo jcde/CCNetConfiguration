@@ -36,9 +36,9 @@
 	<property name="month" value="${string::substring(datetime::now(), 0, 2)}" />
 	<property name="year" value="${string::substring(datetime::now(), 9, 1)}" />
 
-  <property name="product.name" value="${path::get-file-name-without-extension( build.file )}" failonerror="false" />
-  <xmlpeek property="product.name" if="${file::exists(currentVersion.xml)}" 
-           file="${currentVersion.xml}" xpath="/product/@name" />
+	<property name="product.name" value="${path::get-file-name-without-extension( build.file )}" failonerror="false" />
+	<xmlpeek property="product.name" if="${file::exists(currentVersion.xml)}" 
+			 file="${currentVersion.xml}" xpath="/product/@name" />
 
 	<property name="web.dir" value="${product.dir}\${product.name}.Web" />
 
@@ -50,13 +50,16 @@
 		xpath="/product/@build" if="${file::exists(currentVersion.xml)}" />
 	<xmlpeek property="product.version.revision" file="${currentVersion.xml}" 
 		xpath="/product/@revision" if="${file::exists(currentVersion.xml)}" />
-  <xmlpeek property="dotNetVersionMajor" file="${currentVersion.xml}" failonerror="false" if="${file::exists(currentVersion.xml)}"
+	<xmlpeek property="dotNetVersionMajor" file="${currentVersion.xml}" failonerror="false" if="${file::exists(currentVersion.xml)}"
 		xpath="/product/usesProduct[@name='Microsoft .Net Framework']/@major" />
 	<xmlpeek property="dotNetVersionMinor" file="${currentVersion.xml}" failonerror="false" if="${file::exists(currentVersion.xml)}"
 		xpath="/product/usesProduct[@name='Microsoft .Net Framework']/@minor" />
 	<property name="nant.settings.currentframework" if="${property::exists('dotNetVersionMajor')}" 
 		value = "${ 'net-' + dotNetVersionMajor + '.' + dotNetVersionMinor }" />
 
+	<property name="xPathProductDeploy" failonerror="false"
+			value="/products/product[@name='${product.name}']/version[@major='${product.version.major}'][@minor='${product.version.minor}'][auto/@deploy='${currentDeploy}']" />
+		
 	<if test="${property::exists('product.version.major')}" >
 		<property name="productDirRegistered" dynamic="True" value="" />
 		<xmlpeek property="productDirRegistered" file="${Products.xml}" failonerror="false"
@@ -66,9 +69,9 @@
 			<fail message="Update version or product dir in '${Products.xml}' to ${product.dir}. ${productDirRegistered} is wrong." />
 		</if>
     
-  	<xmlpeek property="deployArgs" file="${Products.xml}" failonerror="false"
-			xpath="/products/product[@name='${product.name}']/version[@major='${product.version.major}'][@minor='${product.version.minor}']/auto[@deploy='${currentDeploy}']/@args" />
-  </if>
+  	<xmlpeek property="deployArgs" file="${Products.xml}" failonerror="false" xpath="${xPathProductDeploy}/@args" />
+	</if>
+
 
   <target name="init">
     <property name="web.config" value="${web.dir}\web.config" overwrite="false" />

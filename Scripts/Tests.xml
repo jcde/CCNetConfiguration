@@ -2,13 +2,12 @@
 <project default="debug">
 
 	<target name="testsInit" depends="build">
-		<property name="xPathProductVersionDeploy" value="/products/product[@name='${product.name}']/version[@major='${product.version.major}'][@minor='${product.version.minor}'][auto/@deploy='${currentDeploy}']" />
 		<property name="autoXml" value="" />
-		<xmlpeek property="autoXml" file="${Products.xml}" xpath="${xPathProductVersionDeploy}" failonerror="false" />
+		<xmlpeek property="autoXml" file="${Products.xml}" xpath="${xPathProductDeploy}" failonerror="false" />
 	
 		<property name="testOnly" value="" />
 		<xmlpeek property="testOnly" file="${Products.xml}" if="${string::index-of(autoXml, 'testOnly') != -1}"
-			xpath="${xPathProductVersionDeploy}/auto/@testOnly" />
+			xpath="${xPathProductDeploy}/auto/@testOnly" />
 		<property name="testOnly" value="*.dll" if="${string::get-length(testOnly) == 0}"/>			
 		<property name="testOnly" value="${product.name}*" if="${testOnly == 'This'}"/>
  
@@ -27,7 +26,7 @@ ${vshostfilename}" />
 
 		<property name="excludeTest" 	value="" />
 		<xmlpeek property="excludeTest" file="${Products.xml}" if="${string::index-of(autoXml, 'excludeTest') != -1}"
-			xpath="${xPathProductVersionDeploy}/auto/@excludeTest" />
+			xpath="${xPathProductDeploy}/auto/@excludeTest" />
 		<if test="${string::get-length(excludeTest) > 0}" >
 			<foreach item="String" in="${excludeTest}" delim=";" property="s">    
 				<property name="excludeFiles" 	value="${excludeFiles}
@@ -58,6 +57,20 @@ ${s}" />
 				</assemblies> 
 			</test>
 		</nunit2>
+		
+		<call target="testMS" />
+	</target>
+
+	<target name="testMS" depends="testsInit" >
+		<property name="mstest.dir" value="${metrics.dir}\mstest" />
+		<delete dir="${mstest.dir}" />
+		<mkdir dir="${mstest.dir}" />
+		<exec program="${IDEPath}MSTest.exe" workingdir="${output.dir}" >
+			<arg value="/testcontainer:${testOnly}" />
+			<arg value="/resultsfile:${mstest.dir}\results.trx" />
+			<!--arg value="/testmetadata:${mstest_metadatafile}" /
+			arg value="/category:db" /-->
+        </exec>          
 	</target>
 
 	<target name="ncover" depends="test" >

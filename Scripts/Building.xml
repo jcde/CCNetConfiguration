@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 <project>
-<!-- Visual Studio 2008 must be installed -->
-  <!--property name="devenv2008.exe" value="${programs86}\Microsoft Visual Studio 9.0\Common7\IDE\devenv.exe" /-->
-  <property name="devenv2008.exe" value="${string::replace(environment::get-variable('VS90COMNTOOLS'),'Tools\','IDE\devenv.exe')}" 
-            if="${environment::variable-exists('VS90COMNTOOLS')}" />
+<!-- Visual Studio 2010 by default -->
+  <property name="VSVersion" value="100"/>
+
+  <property name="IDEPath" value="${environment::get-variable('VS'+VSVersion+'COMNTOOLS')}..\IDE\" />
+  <property name="devenv.exe" value="${IDEPath}devenv.exe" />
 <!-- gzip must be installed -->
   <property name="gzip.exe" value="${programs86}\gnuwin32\bin\zip.exe" />
 
@@ -75,7 +76,7 @@
       <exec program="${scripts.dir}\build.bat" commandline="${project.config} &quot;${sln.file}&quot;" workingdir="${build.dir}"
         resultproperty="res" failonerror="false" /-->
  			<exec commandline="&quot;${sln.file}&quot; /build ${project.config} /out output.log "
-				program="${devenv2008.exe}" resultproperty="res" failonerror="false" />
+				program="${devenv.exe}" resultproperty="res" failonerror="false" />
 			<if test="${res != '0'}" >
 				<loadfile file="output.log" property="outputlog" />
 				<fail message="${outputlog}" />
