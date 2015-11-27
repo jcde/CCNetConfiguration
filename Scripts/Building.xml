@@ -76,12 +76,15 @@
       <!-- rem MSBuild does not support vbproj files >
       <exec program="${scripts.dir}\build.bat" commandline="${project.config} &quot;${sln.file}&quot;" workingdir="${build.dir}"
         resultproperty="res" failonerror="false" /-->
- 			<exec commandline="&quot;${sln.file}&quot; /build ${project.config} /out output.log "
+ 			<!--exec commandline="&quot;${sln.file}&quot; /build ${project.config} /out output.log "
 				program="${devenv.exe}" resultproperty="res" failonerror="false" />
 			<if test="${res != '0'}" >
 				<loadfile file="output.log" property="outputlog" />
 				<fail message="${outputlog}" />
-			</if>
+			</if-->
+			<msbuild project="${sln.file}" >
+				<property name="Configuration" value="${project.config}" />
+			</msbuild>
 			<if test="${project.config != productset.name}" >
 	 			<echo>devenv.exe cannot set specific output dir</echo>
  				<copy todir="${output.dir}" overwrite="true" >
