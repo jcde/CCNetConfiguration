@@ -57,9 +57,6 @@
 	<property name="nant.settings.currentframework" if="${property::exists('dotNetVersionMajor')}" 
 		value = "${ 'net-' + dotNetVersionMajor + '.' + dotNetVersionMinor }" />
 
-	<property name="xPathProductDeploy" failonerror="false"
-			value="/products/product[@name='${product.name}']/version[@major='${product.version.major}'][@minor='${product.version.minor}'][auto/@deploy='${currentDeploy}']" />
-		
 	<if test="${property::exists('product.version.major')}" >
 		<property name="productDirRegistered" dynamic="True" value="" />
 		<xmlpeek property="productDirRegistered" file="${Products.xml}" failonerror="false"
@@ -68,9 +65,12 @@
   		<if test="${string::to-lower(productDirRegistered) != string::to-lower(product.dir)}" > 
 			<fail message="Update version or product dir in '${Products.xml}' to ${product.dir}. ${productDirRegistered} is wrong." />
 		</if>
-    
-  	<xmlpeek property="deployArgs" file="${Products.xml}" failonerror="false" xpath="${xPathProductDeploy}/@args" />
 	</if>
+	<property name="xPathProductDeploy" failonerror="false"
+			value="/products/product[@name='${product.name}']/version[@major='${product.version.major}'][@minor='${product.version.minor}'][auto/@deploy='${currentDeploy}']" />
+	<xmlpeek property="deployArgs" file="${Products.xml}" failonerror="false" xpath="${xPathProductDeploy}/auto/@args" />
+	<xmlpeek property="deployArgs" file="${Products.xml}" failonerror="false" xpath="${xPathProductDeploy}/@args"
+			 if="${not property::exists('deployArgs')}"/>
 
 
   <target name="init">
