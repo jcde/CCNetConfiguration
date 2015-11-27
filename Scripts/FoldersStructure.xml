@@ -65,12 +65,13 @@
   		<if test="${string::to-lower(productDirRegistered) != string::to-lower(product.dir)}" > 
 			<fail message="Update version or product dir in '${Products.xml}' to ${product.dir}. ${productDirRegistered} is wrong." />
 		</if>
-	</if>
+
 	<property name="xPathProductDeploy" failonerror="false"
 			value="/products/product[@name='${product.name}']/version[@major='${product.version.major}'][@minor='${product.version.minor}'][auto/@deploy='${currentDeploy}']" />
 	<xmlpeek property="deployArgs" file="${Products.xml}" failonerror="false" xpath="${xPathProductDeploy}/auto/@args" />
 	<xmlpeek property="deployArgs" file="${Products.xml}" failonerror="false" xpath="${xPathProductDeploy}/@args"
 			 if="${not property::exists('deployArgs')}"/>
+  </if>
 
 
   <target name="init">
