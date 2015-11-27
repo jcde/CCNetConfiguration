@@ -2,6 +2,8 @@
 <project default="debug">
 
 	<target name="testsInit" depends="build">
+		<property name="project.config" value="DEBUG" />
+	
 		<property name="autoXml" value="" />
 		<xmlpeek property="autoXml" file="${Products.xml}" xpath="${xPathProductDeploy}" failonerror="false" />
 	
