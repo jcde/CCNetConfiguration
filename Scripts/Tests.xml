@@ -9,7 +9,7 @@
 	
 		<property name="testOnly" value="" />
 		<xmlpeek property="testOnly" file="${Products.xml}" if="${string::index-of(autoXml, 'testOnly') != -1}"
-			xpath="${xPathProductDeploy}/auto/@testOnly" />
+			xpath="${xPathProductAuto}/@testOnly" />
 		<property name="testOnly" value="*.dll" if="${string::get-length(testOnly) == 0}"/>			
 		<property name="testOnly" value="${product.name}*" if="${testOnly == 'This'}"/>
  

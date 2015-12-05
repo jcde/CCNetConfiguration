@@ -9,7 +9,7 @@
 		<xmlpoke file="${currentVersion.xml}" xpath="/product/@build"
 			 value="0" />
 		<xmlpoke value="0" file="${Products.xml}" 
-			xpath="/products/product[@name='${product.name}']/version[@major='${product.version.major}'][@minor='${product.version.minor}']/@minor" />
+			xpath="${xPathProduct}/@minor" />
 		<xmlpoke value="${int::parse(product.version.major)+1}" file="${Products.xml}" 
 			xpath="/products/product[@name='${product.name}']/version[@major='${product.version.major}'][@minor='0']/@major" />
 
@@ -23,7 +23,7 @@
 		<xmlpoke file="${currentVersion.xml}" xpath="/product/@build"
 			 value="0" />
 		<xmlpoke value="${int::parse(product.version.minor)+1}" file="${Products.xml}" 
-			xpath="/products/product[@name='${product.name}']/version[@major='${product.version.major}'][@minor='${product.version.minor}']/@minor" />
+			xpath="${xPathProduct}/@minor" />
 
 		<call target="mkAssemInfo" />
 	</target>
