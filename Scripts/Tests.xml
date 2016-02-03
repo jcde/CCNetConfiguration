@@ -22,8 +22,11 @@
 				<property name="includeFile" value="..\..\${ path::get-file-name-without-extension(s)}\bin\${project.config}\${s}" />
 				<property name="includeFiles" if="${file::exists(output.dir+'\'+includeFile)}" value="${includeFiles}
 ${includeFile}" />
+				<property name="includeFile" value="..\..\${ path::get-file-name-without-extension(s)}\bin\${s}" />
+				<property name="includeFiles" if="${file::exists(output.dir+'\'+includeFile)}" value="${includeFiles}
+${includeFile}" />
 				<property name="includeFiles" if="${not file::exists(output.dir+'\'+includeFile)}" value="${includeFiles}
-..\..\${ path::get-file-name-without-extension(s)}\bin\${s}" />
+..\..\${ path::get-file-name-without-extension(s)}\bin\x86\${project.config}\${s}" />
 			</if>
 			<property name="includeFiles" if="${property::exists('oubputBinFlatten') and oubputBinFlatten=='true'}"	value="${includeFiles}
 ${s}" />
