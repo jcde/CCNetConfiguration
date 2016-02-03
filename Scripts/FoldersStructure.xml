@@ -4,9 +4,9 @@
 	<property name="currentDeploy" value="${path::get-file-name-without-extension( environment::get-variable('currentDeploy') )}" />
 	<property name="root.dir" value="${ path::get-directory-name(path::get-directory-name(path::get-directory-name(path::get-directory-name(environment::get-variable('currentDeploy')	)))) }" />
  	<property name="programs86" value="${environment::get-variable('ProgramFiles')}" />
-  <if test="${environment::get-variable('PROCESSOR_ARCHITECTURE')!='x86'}" >
-  	<property name="programs86" value="${environment::get-variable('ProgramFiles(x86)')}" />
-  </if> 
+	<if test="${environment::get-variable('PROCESSOR_ARCHITECTURE')!='x86'}" >
+		<property name="programs86" value="${environment::get-variable('ProgramFiles(x86)')}" />
+	</if> 
 	<property name="svn.exe" value="svn" /> <!--${environment::get-folder-path('ProgramFiles')}\Subversion\bin\svn.exe" /-->
 
  	<property name="sources.dir" value="${ path::get-directory-name(path::get-directory-name(path::get-directory-name(environment::get-variable('currentDeploy')	))) }" />
@@ -70,10 +70,11 @@
 
 		<property name="xPathProductAuto" failonerror="false" value="${xPathProduct}/auto[@deploy='${currentDeploy}']" />
 		<property name="xPathProductVersion" failonerror="false" value="${xPathProduct}[auto/@deploy='${currentDeploy}']" />
+
 		<xmlpeek property="deployArgs" file="${Products.xml}" failonerror="false" xpath="${xPathProductAuto}/@args" />
 		<xmlpeek property="deployArgs" file="${Products.xml}" failonerror="false" xpath="${xPathProductVersion}/@args"
 				 if="${not property::exists('deployArgs')}"/>
-	  </if>
+	</if>
 
 
   <target name="init">
