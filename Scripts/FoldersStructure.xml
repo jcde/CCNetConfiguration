@@ -87,7 +87,8 @@
     </copy>
 
     <property name="sln.file" value="${path::get-file-name-without-extension( project::get-buildfile-uri() )}" />
-	<if test="${file::exists(sln.file+'.sln')}" >
+	<echo>was sln ${sln.file}</echo>
+	<if test="${file::exists(product.dir + '\' + sln.file+'.sln')}" >
 		<property name="sln.file" value="${sln.file}.sln" />
 	</if>
 		<property name="pnl" value="${string::get-length(product.name) + 1}" />
