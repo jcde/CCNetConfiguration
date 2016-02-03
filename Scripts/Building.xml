@@ -85,6 +85,7 @@
 			</if-->
 			<msbuild project="${sln.file}" >
 				<property name="Configuration" value="${project.config}" />
+				<property name="VisualStudioVersion" value="10.0" />
 			</msbuild>
 			<if test="${project.config != productset.name}" >
 	 			<echo>devenv.exe cannot set specific output dir</echo>
