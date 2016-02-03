@@ -18,9 +18,11 @@
 		<foreach item="String" in="${testOnly}" delim=";" property="s" if="${string::get-length(testOnly) > 0}">    
 			<echo message="to be tested: ${s}" />
 			<!-- oubputBinFlatten is set during building -->
-			<property name="includeFiles" if="${not property::exists('oubputBinFlatten') or oubputBinFlatten=='true'}"	value="${includeFiles}
+			<property name="includeFiles" if="${not property::exists('oubputBinFlatten') or oubputBinFlatten==''}"	value="${includeFiles}
+..\..\${ path::get-file-name-without-extension(s)}\bin\${project.config}\${s}" />
+			<property name="includeFiles" if="${property::exists('oubputBinFlatten') and oubputBinFlatten=='true'}"	value="${includeFiles}
 ${s}" />
-			<property name="includeFiles" if="${property::exists('oubputBinFlatten') and oubputBinFlatten!='true'}"	value="${includeFiles}
+			<property name="includeFiles" if="${property::exists('oubputBinFlatten') and oubputBinFlatten=='false'}"	value="${includeFiles}
 ${ path::get-file-name-without-extension(s)}\bin\${project.config}\${s}" />
 		</foreach>
 		<echo file="${output.dir}\${product.name}.includeTest" message="${includeFiles}" />

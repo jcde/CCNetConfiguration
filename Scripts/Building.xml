@@ -98,17 +98,19 @@
 			</if>
 
  			<!-- gather all dll files in output folders -->
-			<property name="oubputBinFlatten" value="true" />
+			<property name="oubputBinFlatten" value="" />
 			<xmlpeek property="oubputBinFlatten" file="${Products.xml}" xpath="${xPathProductAuto}/@oubputBinFlatten" failonerror="false" />
- 			<copy todir="${output.dir}" flatten="${oubputBinFlatten}" if="${property::exists('dotNetVersionMajor')}" >
-				<fileset basedir="${product.dir}">
-					<include name="\**\bin\${project.config}\*.exe" />
-					<include name="\**\bin\${project.config}\*.dll" />
-					<include name="\**\bin\${project.config}\*.bat" />
-					<include name="\**\bin\${project.config}\**" if="${project.config=='Debug' }" />
-				</fileset>
-			</copy>
-
+			<if test="${oubputBinFlatten != ''}" >
+				<copy todir="${output.dir}" flatten="${oubputBinFlatten}" if="${property::exists('dotNetVersionMajor')}" >
+					<fileset basedir="${product.dir}">
+						<include name="\**\bin\${project.config}\*.exe" />
+						<include name="\**\bin\${project.config}\*.dll" />
+						<include name="\**\bin\${project.config}\*.bat" />
+						<include name="\**\bin\${project.config}\**" if="${project.config=='Debug' }" />
+					</fileset>
+				</copy>
+			</if>
+			
  			<!-- gather all dll files in output folders for C++ -->
  			<copy todir="${output.dir}" flatten="true" if="${not property::exists('dotNetVersionMajor')}" >
 				<fileset basedir="${product.dir}">
