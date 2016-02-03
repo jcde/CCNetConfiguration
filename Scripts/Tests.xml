@@ -18,8 +18,13 @@
 		<foreach item="String" in="${testOnly}" delim=";" property="s" if="${string::get-length(testOnly) > 0}">    
 			<echo message="to be tested: ${s}" />
 			<!-- oubputBinFlatten is set during building -->
-			<property name="includeFiles" if="${not property::exists('oubputBinFlatten') or oubputBinFlatten==''}"	value="${includeFiles}
-..\..\${ path::get-file-name-without-extension(s)}\bin\${project.config}\${s}" />
+			<if test="${not property::exists('oubputBinFlatten') or oubputBinFlatten==''}" >
+				<property name="includeFile" value="..\..\${ path::get-file-name-without-extension(s)}\bin\${project.config}\${s}" />
+				<property name="includeFiles" if="${file::exists(output.dir+'\'+includeFile)}" value="${includeFiles}
+${includeFile}" />
+				<property name="includeFiles" if="${not file::exists(output.dir+'\'+includeFile)}" value="${includeFiles}
+..\..\${ path::get-file-name-without-extension(s)}\bin\${s}" />
+			</if>
 			<property name="includeFiles" if="${property::exists('oubputBinFlatten') and oubputBinFlatten=='true'}"	value="${includeFiles}
 ${s}" />
 			<property name="includeFiles" if="${property::exists('oubputBinFlatten') and oubputBinFlatten=='false'}"	value="${includeFiles}
