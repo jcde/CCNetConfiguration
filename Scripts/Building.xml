@@ -67,7 +67,7 @@
 			</copy>
 		</if>
 
-		<if test="${ not target::exists('buildOther') and (not property::exists('dotNetVersionMajor') or (property::exists('dotNetVersionMajor') and (dotNetVersionMajor=='2' or dotNetVersionMajor=='3'))) }">
+		<if test="${ not target::exists('buildOther') }">
 			<delete if="${file::exists(product.dir+'\output.log')}"
 				file="${product.dir}\output.log" />
 			<echo>${sln.file}</echo>

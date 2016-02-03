@@ -5,13 +5,22 @@
 		<property name="project.config" value="DEBUG" />
 	
 		<property name="autoXml" value="" />
-		<xmlpeek property="autoXml" file="${Products.xml}" xpath="${xPathProductDeploy}" failonerror="false" />
+		<xmlpeek property="autoXml" file="${Products.xml}" xpath="${xPathProductVersion}" failonerror="false" />
 	
 		<property name="testOnly" value="" />
 		<xmlpeek property="testOnly" file="${Products.xml}" if="${string::index-of(autoXml, 'testOnly') != -1}"
 			xpath="${xPathProductAuto}/@testOnly" />
+
 		<property name="testOnly" value="*.dll" if="${string::get-length(testOnly) == 0}"/>			
 		<property name="testOnly" value="${product.name}*" if="${testOnly == 'This'}"/>
+
+		<property name="includeFiles" 	value="" />
+		<foreach item="String" in="${testOnly}" delim=";" property="s" if="${string::get-length(testOnly) > 0}">    
+			<echo message="to be tested: ${s}" />
+			<property name="includeFiles" 	value="${includeFiles}
+${s}" />
+		</foreach>
+		<echo file="${output.dir}\${product.name}.includeTest" message="${includeFiles}" />
  
 		<property name="excludeFiles" 	value="nunit.framework.dll" />
 		<foreach item="File" property="vshostfilename">
@@ -28,7 +37,7 @@ ${vshostfilename}" />
 
 		<property name="excludeTest" 	value="" />
 		<xmlpeek property="excludeTest" file="${Products.xml}" if="${string::index-of(autoXml, 'excludeTest') != -1}"
-			xpath="${xPathProductDeploy}/auto/@excludeTest" />
+			xpath="${xPathProductVersion}/@excludeTest" />
 		<if test="${string::get-length(excludeTest) > 0}" >
 			<foreach item="String" in="${excludeTest}" delim=";" property="s">    
 				<property name="excludeFiles" 	value="${excludeFiles}
@@ -53,14 +62,11 @@ ${s}" />
 
 			<test>
 				<assemblies basedir="${output.dir}" > 
-				  	<include name="${testOnly}" if="${string::get-length(testOnly) > 0}" />
-				  	<include name="*.exe" />
+				  	<includesfile name="${output.dir}\${product.name}.includeTest" />
 					<excludesfile name="${output.dir}\${product.name}.excludeTest" />
 				</assemblies> 
 			</test>
 		</nunit2>
-		
-		<call target="testMS" />
 	</target>
 
 	<target name="testMS" depends="testsInit" >
