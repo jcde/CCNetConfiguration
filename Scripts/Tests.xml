@@ -65,12 +65,12 @@ ${s}" />
 		    </fileset>
 		</delete>
 
-		<nunit2 failonerror="false" >
+		<nunit2 failonerror="false" haltonfailure="false" >
 			<formatter type="Xml" usefile="true" extension=".xml" 
 				outputdir="${metrics.dir}\nunit" 
 			/>
 
-			<test>
+			<test haltonfailure="false">
 				<assemblies basedir="${output.dir}" > 
 				  	<includesfile name="${output.dir}\${product.name}.includeTest" />
 					<excludesfile name="${output.dir}\${product.name}.excludeTest" />
