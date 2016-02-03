@@ -5,7 +5,7 @@
   <property name="VSVersion" value="100" if="${environment::variable-exists('VS100COMNTOOLS')}" />
 
   <property name="IDEPath" value="${environment::get-variable('VS'+VSVersion+'COMNTOOLS')}..\IDE\" failonerror="false" />
-  <property name="devenv.exe" value="${IDEPath}devenv.exe" failonerror="false" />                                                        
+<!--  <property name="devenv.exe" value="${IDEPath}devenv.exe" failonerror="false" />  -->
 <!-- gzip must be installed -->
   <property name="gzip.exe" value="${programs86}\gnuwin32\bin\zip.exe" />
 
