@@ -98,7 +98,9 @@
 			</if>
 
  			<!-- gather all dll files in output folders -->
- 			<copy todir="${output.dir}" flatten="true" if="${property::exists('dotNetVersionMajor')}" >
+			<property name="oubputBinFlatten" value="true" />
+			<xmlpeek property="oubputBinFlatten" file="${Products.xml}" xpath="${xPathProductAuto}/@oubputBinFlatten" failonerror="false" />
+ 			<copy todir="${output.dir}" flatten="${oubputBinFlatten}" if="${property::exists('dotNetVersionMajor')}" >
 				<fileset basedir="${product.dir}">
 					<include name="\**\bin\${project.config}\*.exe" />
 					<include name="\**\bin\${project.config}\*.dll" />

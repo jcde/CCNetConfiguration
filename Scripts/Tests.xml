@@ -17,8 +17,11 @@
 		<property name="includeFiles" 	value="" />
 		<foreach item="String" in="${testOnly}" delim=";" property="s" if="${string::get-length(testOnly) > 0}">    
 			<echo message="to be tested: ${s}" />
-			<property name="includeFiles" 	value="${includeFiles}
+			<!-- oubputBinFlatten is set during building -->
+			<property name="includeFiles" if="${not property::exists('oubputBinFlatten') or oubputBinFlatten=='true'}"	value="${includeFiles}
 ${s}" />
+			<property name="includeFiles" if="${property::exists('oubputBinFlatten') and oubputBinFlatten!='true'}"	value="${includeFiles}
+${ path::get-file-name-without-extension(s)}\bin\${project.config}\${s}" />
 		</foreach>
 		<echo file="${output.dir}\${product.name}.includeTest" message="${includeFiles}" />
  
@@ -55,7 +58,7 @@ ${s}" />
 		    </fileset>
 		</delete>
 
-		<nunit2 failonerror="false" haltonfailure="false" >
+		<nunit2 failonerror="false" >
 			<formatter type="Xml" usefile="true" extension=".xml" 
 				outputdir="${metrics.dir}\nunit" 
 			/>
