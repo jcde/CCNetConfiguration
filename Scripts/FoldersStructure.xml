@@ -87,10 +87,10 @@
     </copy>
 
     <property name="sln.file" value="${path::get-file-name-without-extension( project::get-buildfile-uri() )}" />
-	<echo>was sln ${product.dir + '\' + sln.file+'.sln'}</echo>
 	<if test="${file::exists(product.dir + '\' + sln.file+'.sln')}" >
 		<property name="sln.file" value="${sln.file}.sln" />
 	</if>
+	<echo>was sln ${sln.file}</echo>
 		<property name="pnl" value="${string::get-length(product.name) + 1}" />
 		<property name="slnIndex" value="${string::index-of(build.file, '.sln')}" />
 		<if test="${int::parse(slnIndex) > int::parse(pnl)}" >
