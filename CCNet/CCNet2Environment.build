@@ -127,7 +127,7 @@
 				</ifnot>
 			</ifnot>
 			<property name="sourcecontrol" dynamic="true" value='
-				&lt;sourcecontrol type="${sourceType}" &gt;
+				&lt;sourcecontrol type="${sourceType}" autoGetSource="true" &gt;
 					${sscpart}
 					&lt;username&gt;${_username}&lt;/username&gt;
 					&lt;password&gt;${_password}&lt;/password&gt;
