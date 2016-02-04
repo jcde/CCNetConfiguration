@@ -68,16 +68,20 @@ ${s}" />
 		    </fileset>
 		</delete>
 
+		<property name="excludeCategory" value="" />
+		<xmlpeek property="excludeCategory" file="${Products.xml}" xpath="${xPathProductAuto}/@excludeCategory" failonerror="false" />
 		<nunit2 failonerror="false" haltonfailure="false" >
 			<formatter type="Xml" usefile="true" extension=".xml" 
 				outputdir="${metrics.dir}\nunit" 
 			/>
-
 			<test haltonfailure="false">
 				<assemblies basedir="${output.dir}" > 
 				  	<includesfile name="${output.dir}\${product.name}.includeTest" />
 					<excludesfile name="${output.dir}\${product.name}.excludeTest" />
 				</assemblies> 
+				<categories>
+					<exclude name="${excludeCategory}" />
+				</categories>
 			</test>
 		</nunit2>
 	</target>
