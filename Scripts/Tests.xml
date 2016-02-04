@@ -19,14 +19,14 @@
 			<echo message="to be tested: ${s}" />
 			<!-- oubputBinFlatten is set during building -->
 			<if test="${not property::exists('oubputBinFlatten') or oubputBinFlatten==''}" >
-				<property name="includeFile" value="..\..\${ path::get-file-name-without-extension(s)}\bin\${project.config}\${s}" />
-				<property name="includeFiles" if="${file::exists(output.dir+'\'+includeFile)}" value="${includeFiles}
+				<property name="includeFileTemp" value="..\..\${ path::get-file-name-without-extension(s)}\bin\x86\${project.config}\${s}" />
+				<property name="includeFile" if="${file::exists(output.dir+'\'+includeFileTemp)}" value="${includeFileTemp}" />
+				<property name="includeFileTemp" value="..\..\${ path::get-file-name-without-extension(s)}\bin\${s}" />
+				<property name="includeFile" if="${file::exists(output.dir+'\'+includeFileTemp)}" value="${includeFileTemp}" />
+				<property name="includeFileTemp" value="..\..\${ path::get-file-name-without-extension(s)}\bin\${project.config}\${s}" />
+				<property name="includeFile" if="${file::exists(output.dir+'\'+includeFileTemp)}" value="${includeFileTemp}" />
+				<property name="includeFiles" value="${includeFiles}
 ${includeFile}" />
-				<property name="includeFile" value="..\..\${ path::get-file-name-without-extension(s)}\bin\${s}" />
-				<property name="includeFiles" if="${file::exists(output.dir+'\'+includeFile)}" value="${includeFiles}
-${includeFile}" />
-				<property name="includeFiles" if="${not file::exists(output.dir+'\'+includeFile)}" value="${includeFiles}
-..\..\${ path::get-file-name-without-extension(s)}\bin\x86\${project.config}\${s}" />
 			</if>
 			<property name="includeFiles" if="${property::exists('oubputBinFlatten') and oubputBinFlatten=='true'}"	value="${includeFiles}
 ${s}" />
