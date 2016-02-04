@@ -58,6 +58,8 @@
 		<xmlpeek property="projccnetConfigPart" file="${Products.xml}" failonerror="false"
 				xpath="${xpathADir}/auto[@deploy='${currentDeploy}']/ccnetConfigPart" />
 					
+		<xmlpeek property="excludeCategory" file="${Products.xml}" failonerror="false" 
+			xpath="${xpathAName2}/@excludeCategory" />
 		<property name="prodDescription" value="" dynamic="true" />
 		<xmlpeek property="prodDescription" file="${Products.xml}" failonerror="false"
 			xpath="/products/product[./@name='${AutoProduct.name}'][./version/auto/@deploy='${currentDeploy}']/description" /> 
