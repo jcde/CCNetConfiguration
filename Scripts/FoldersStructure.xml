@@ -70,6 +70,10 @@
 
 		<property name="xPathProductAuto" failonerror="false" value="${xPathProduct}/auto[@deploy='${currentDeploy}']" />
 		<property name="xPathProductVersion" failonerror="false" value="${xPathProduct}[auto/@deploy='${currentDeploy}']" />
+		
+		<!-- may be used in Products.xml -->
+		<property name="excludeCategory" value="" dynamic="True" />
+		<xmlpeek property="excludeCategory" file="${Products.xml}" xpath="${xPathProductAuto}/@excludeCategory" failonerror="false" />
 
 		<xmlpeek property="deployArgs" file="${Products.xml}" failonerror="false" xpath="${xPathProductAuto}/@args" />
 		<xmlpeek property="deployArgs" file="${Products.xml}" failonerror="false" xpath="${xPathProductVersion}/@args"

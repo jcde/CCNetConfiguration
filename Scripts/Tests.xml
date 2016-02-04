@@ -68,8 +68,6 @@ ${s}" />
 		    </fileset>
 		</delete>
 
-		<property name="excludeCategory" value="" />
-		<xmlpeek property="excludeCategory" file="${Products.xml}" xpath="${xPathProductAuto}/@excludeCategory" failonerror="false" />
 		<nunit2 failonerror="false" haltonfailure="false" >
 			<formatter type="Xml" usefile="true" extension=".xml" 
 				outputdir="${metrics.dir}\nunit" 
