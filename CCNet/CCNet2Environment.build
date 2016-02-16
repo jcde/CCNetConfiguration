@@ -142,6 +142,7 @@
 		<xmlpeek property="prSet" file="${Products.xml}" failonerror="false"
 			xpath="${xpathADir}/auto[@deploy='${currentDeploy}']/@productSet" />
 	  
+		<property name="buildFile" value="" dynamic="true" />
 		<!-- file exists checking works on local files but must look into reposisaty -->   
 		<if test="${string::get-length(prSet) > 0}" >
 			<property name="buildFile" value="${AutoProduct.dir.dynamic}\${AutoProduct.name}.${prSet}.build" /> 
