@@ -138,6 +138,8 @@
 			' />
 		</if>
 		
+		<xmlpeek property="buildFile" file="${Products.xml}" failonerror="false"
+			xpath="${xpathAName}/@build" /> 
 		<property name="prSet" value="" /> 
 		<xmlpeek property="prSet" file="${Products.xml}" failonerror="false"
 			xpath="${xpathADir}/auto[@deploy='${currentDeploy}']/@productSet" />

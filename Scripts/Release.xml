@@ -1,6 +1,19 @@
 <?xml version="1.0"?>
 <project>
-<!-- Subversion SVN must be installed -->
+
+	<!-- properties nugetProject and nugetServer are used -->
+	<target name="nugetPackage" >
+		<exec program="nuget" commandline="spec ${product.dir}\${nugetProject}\${nugetProject}.csproj" />
+		<exec program="nuget" commandline="pack ${product.dir}\${nugetProject}\${nugetProject}.csproj -Exclude Tests\* -Prop Configuration=Release" />
+
+		<copy todir="${nugetServer}" overwrite="true" >
+			<fileset basedir="${product.dir}" >
+				<include name="${nugetProject}*.nupkg" />
+			</fileset>
+		</copy>
+	</target>
+		
+	<!-- Subversion SVN must be installed -->
 	<target name="export" depends="build" >
 		<property name="destPath" value="${tags.dir}\${product.nameVersion}" />
 		
