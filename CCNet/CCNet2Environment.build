@@ -138,8 +138,6 @@
 			' />
 		</if>
 		
-		<xmlpeek property="buildFile" file="${Products.xml}" failonerror="false"
-			xpath="${xpathAName}/@build" /> 
 		<property name="prSet" value="" /> 
 		<xmlpeek property="prSet" file="${Products.xml}" failonerror="false"
 			xpath="${xpathADir}/auto[@deploy='${currentDeploy}']/@productSet" />
@@ -156,6 +154,8 @@
 			<property name="buildFile" if="${not (file::exists(buildFile))}"
 						value="${AutoProduct.dir.dynamic}\${AutoProduct.name}.build" /> 
 		</ifnot>
+		<xmlpeek property="buildFile" file="${Products.xml}" failonerror="false" if="${not (file::exists(buildFile))}"
+			xpath="${xpathAName}/@build" /> 
 
 		<property name="targetList" value="" /> 
 		<xmlpeek property="targetList" file="${Products.xml}" failonerror="false"
