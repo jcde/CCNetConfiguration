@@ -169,9 +169,10 @@
   </target>
 
   <target name="mysqlBackup" >
-     <mkdir dir="${backup.dir}\${product.name}" />
-		 <property name="backupFile" value="${backup.dir}\${product.name}\${initialCatalog}_${year+month+day}" />
-     <exec program="${scripts.dir}\mysqlDump.bat" timeout="1800000" > 
+	<property name="backupDir" value="${backup.dir}\${product.name}" />
+    <mkdir dir="${backupDir}" />
+	<property name="backupFile" value="${backupDir}\${initialCatalog}_${year+month+day}" />
+    <exec program="mysqlDump.bat" timeout="1800000" basedir="${scripts.dir}" workingdir="${scripts.dir}" > 
               <arg value="${initialCatalog}" />
               <arg value="${gzip.exe}" />
               <arg value="${backupFile}_mysql.zip" />
@@ -179,7 +180,21 @@
               <arg value="${userId}" />
               <arg value="${pass}" />
               <arg value="${zipPassword}" />
-     </exec>
+    </exec>
+	
+	<fileset id="thelogs" basedir="${backupDir}">
+		<include name="*.zip" />
+	</fileset>
+	<foreach item="File" property="filename">
+		<in>
+			<items refid="thelogs" />
+		</in>
+		<do>
+			<if test="${timespan::get-days(datetime::now() - file::get-last-write-time(filename)) >= 7}">
+				<delete file="${filename}" />
+			</if>
+		</do>
+	</foreach>
   </target>
 
   <target name="wikiBackup" >
