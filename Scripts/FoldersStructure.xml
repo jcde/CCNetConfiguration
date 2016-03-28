@@ -37,6 +37,7 @@
 	<property name="year" value="${string::substring(datetime::now(), 9, 1)}" />
 
 	<property name="product.name" value="${path::get-file-name-without-extension( build.file )}" failonerror="false" />
+	<property name="product.name" if="${product.name == 'product'}" value="${path::get-file-name(product.dir)}" />
 	<xmlpeek property="product.name" if="${file::exists(currentVersion.xml)}" 
 			 file="${currentVersion.xml}" xpath="/product/@name" />
 
