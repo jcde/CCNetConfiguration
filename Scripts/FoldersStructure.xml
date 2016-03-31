@@ -37,7 +37,13 @@
 	<property name="year" value="${string::substring(datetime::now(), 9, 1)}" />
 
 	<property name="product.name" value="${path::get-file-name-without-extension( build.file )}" failonerror="false" />
-	<property name="product.name" if="${product.name == 'product'}" value="${path::get-file-name(product.dir)}" />
+	<if test="${string::to-lower(product.name) == 'product'}" >
+		<!--too complex properties property name="allProducts" dynamic="True" value="" />
+		<xmlpeek property="allProducts" file="${Products.xml}" xpath="/" /-->
+		<property name="r" value="${'${proj.dir}'}" />
+		<xmlpeek property="product.name" file="${Products.xml}" failonerror="false"
+				 xpath="/products/product[version/@dir='${string::replace(product.dir, proj.dir, r)}']/@name" />
+	</if>
 	<xmlpeek property="product.name" if="${file::exists(currentVersion.xml)}" 
 			 file="${currentVersion.xml}" xpath="/product/@name" />
 
@@ -94,7 +100,10 @@
 	<if test="${file::exists(product.dir + '\' + sln.file+'.sln')}" >
 		<property name="sln.file" value="${sln.file}.sln" />
 	</if>
-	<echo>was sln ${sln.file}</echo>
+	<if test="${file::exists(product.dir + '\' + product.name +'.sln')}" >
+		<property name="sln.file" value="${product.name}.sln" />
+	</if>
+	<echo>was sln ${sln.file} for product ${product.name}</echo>
 		<property name="pnl" value="${string::get-length(product.name) + 1}" />
 		<property name="slnIndex" value="${string::index-of(build.file, '.sln')}" />
 		<if test="${int::parse(slnIndex) > int::parse(pnl)}" >
