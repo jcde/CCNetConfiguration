@@ -151,9 +151,9 @@
 			</ifnot>
 		</if>
 		<ifnot test="${string::get-length(prSet) > 0}" >
-			<property name="buildFile" value="${AutoProduct.dir.dynamic}\${AutoProduct.name}.sln.build" /> 
-			<property name="buildFile" if="${not (file::exists(buildFile))}"
-						value="${AutoProduct.dir.dynamic}\${AutoProduct.name}.build" /> 
+			<property name="buildFile" value="${AutoProduct.dir.dynamic}\Product.build" /> 
+			<property name="buildFile" value="${AutoProduct.dir.dynamic}\${AutoProduct.name}.sln.build" if="${not (file::exists(buildFile))}" /> 
+			<property name="buildFile" value="${AutoProduct.dir.dynamic}\${AutoProduct.name}.build" if="${not (file::exists(buildFile))}" /> 
 		</ifnot>
 		<xmlpeek property="buildFile" file="${Products.xml}" failonerror="false" if="${not (file::exists(buildFile))}"
 			xpath="${xpathAName}/@build" /> 
