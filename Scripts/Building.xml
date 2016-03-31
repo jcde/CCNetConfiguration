@@ -99,7 +99,13 @@
 
  			<!-- gather all dll files in output folders -->
 			<property name="oubputBinFlatten" value="" />
-			<xmlpeek property="oubputBinFlatten" file="${Products.xml}" xpath="${xPathProductAuto}/@oubputBinFlatten" failonerror="false" />
+			<trycatch>
+				<try>
+					<xmlpeek property="oubputBinFlatten" file="${Products.xml}" xpath="${xPathProductAuto}/@oubputBinFlatten" failonerror="false" />
+				</try>
+				<catch>
+				</catch>
+			</trycatch>
 			<if test="${oubputBinFlatten != ''}" >
 				<copy todir="${output.dir}" flatten="${oubputBinFlatten}" if="${property::exists('dotNetVersionMajor')}" >
 					<fileset basedir="${product.dir}">
