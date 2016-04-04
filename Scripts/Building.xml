@@ -10,6 +10,29 @@
 <!-- gzip must be installed -->
   <property name="gzip.exe" value="${programs86}\gnuwin32\bin\zip.exe" />
 
+
+	<property name="deployedProduct.name" value="${product.name}" />
+	<!-- input properties 'prodLib.dir' -->
+	<target name="deployLibHot" >
+ 		<copy todir="${product.dir}" >
+ 			<fileset basedir="${prodLib.dir}\${project.config}" >
+				<include name="**/*" />
+			</fileset>
+		</copy>
+	</target>
+	<!-- input properties 'prodLib.dir', 'deployedProduct.name' -->
+	<target name="deployLib" depends="init" >
+		<property name="prodLib.dir" if="${not property::exists('prodLib.dir')}"
+			value="${product.dir}\..\..\..\deploy\lib\${deployedProduct.name}" />
+	  	<call target="deployLibHot" />
+		<copy todir="${product.dir}" >
+			<fileset basedir="${prodLib.dir}\nodes\${environment::get-variable('ComputerName')}" >
+				<include name="**/*" />
+			</fileset>
+		</copy>
+	</target>
+
+	
   <target name="run" depends="build" >
     <!-- every Web-project and exe-project will be started -->
 	  <property name="targetInside" value="runExecInside" />
@@ -69,6 +92,8 @@
 		</if>
 
 		<if test="${ not target::exists('buildOther') }">
+		  	<call target="deployLib" />
+
 			<delete if="${file::exists(product.dir+'\output.log')}"
 				file="${product.dir}\output.log" />
 			<echo>${sln.file}</echo>
