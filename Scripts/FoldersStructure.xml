@@ -37,12 +37,14 @@
 	<property name="year" value="${string::substring(datetime::now(), 9, 1)}" />
 
 	<property name="product.name" value="${path::get-file-name-without-extension( build.file )}" failonerror="false" />
+
+	<property name="r" value="${'${proj.dir}'}" />
+	<property name="xPathProduct.dir" value="${string::replace(product.dir, proj.dir, r)}" />
 	<if test="${string::to-lower(product.name) == 'product'}" >
 		<!--too complex properties property name="allProducts" dynamic="True" value="" />
 		<xmlpeek property="allProducts" file="${Products.xml}" xpath="/" /-->
-		<property name="r" value="${'${proj.dir}'}" />
 		<xmlpeek property="product.name" file="${Products.xml}" failonerror="false"
-				 xpath="/products/product[version/@dir='${string::replace(product.dir, proj.dir, r)}']/@name" />
+				 xpath="/products/product[version/@dir='${xPathProduct.dir}']/@name" />
 	</if>
 	<xmlpeek property="product.name" if="${file::exists(currentVersion.xml)}" 
 			 file="${currentVersion.xml}" xpath="/product/@name" />
@@ -51,12 +53,28 @@
 
 	<xmlpeek property="product.version.major" file="${currentVersion.xml}"  
 		xpath="/product/@major" if="${file::exists(currentVersion.xml)}" />
+	<xmlpeek property="product.version.major" file="${Products.xml}"  
+		xpath="/products/product/version[@dir='${xPathProduct.dir}']/@major" if="${not file::exists(currentVersion.xml)}" />
+
 	<xmlpeek property="product.version.minor" file="${currentVersion.xml}"  
 		xpath="/product/@minor" if="${file::exists(currentVersion.xml)}" />
+	<xmlpeek property="product.version.minor" file="${Products.xml}"  
+		xpath="/products/product/version[@dir='${xPathProduct.dir}']/@minor" if="${not file::exists(currentVersion.xml)}" />
+
 	<xmlpeek property="product.version.build" file="${currentVersion.xml}" 
 		xpath="/product/@build" if="${file::exists(currentVersion.xml)}" />
+	<xmlpeek property="product.version.build" file="${Products.xml}"  failonerror="false"
+		xpath="/products/product/version[@dir='${xPathProduct.dir}']/@build" if="${not file::exists(currentVersion.xml)}" />
+	<property name="product.version.build" if="${not property::exists('product.version.build')}"
+			value="0" />
+
 	<xmlpeek property="product.version.revision" file="${currentVersion.xml}" 
 		xpath="/product/@revision" if="${file::exists(currentVersion.xml)}" />
+	<xmlpeek property="product.version.revision" file="${Products.xml}"  failonerror="false"
+		xpath="/products/product/version[@dir='${xPathProduct.dir}']/@revision" if="${not file::exists(currentVersion.xml)}" />
+	<property name="product.version.revision" if="${not property::exists('product.version.revision')}"
+			value="0" />
+
 	<xmlpeek property="dotNetVersionMajor" file="${currentVersion.xml}" failonerror="false" if="${file::exists(currentVersion.xml)}"
 		xpath="/product/usesProduct[@name='Microsoft .Net Framework']/@major" />
 	<xmlpeek property="dotNetVersionMinor" file="${currentVersion.xml}" failonerror="false" if="${file::exists(currentVersion.xml)}"

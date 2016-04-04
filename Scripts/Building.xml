@@ -14,10 +14,13 @@
 	<property name="deployedProduct.name" value="${product.name}" />
 	<!-- input properties 'prodLib.dir' -->
 	<target name="deployLibHot" >
- 		<copy todir="${product.dir}" >
+ 		<copy todir="${product.dir}" overwrite="true" >
  			<fileset basedir="${prodLib.dir}\${project.config}" >
 				<include name="**/*" />
 			</fileset>
+			<filterchain><replacetokens>
+				<token key="version" value="${version}" />
+			</replacetokens></filterchain>
 		</copy>
 	</target>
 	<!-- input properties 'prodLib.dir', 'deployedProduct.name' -->
