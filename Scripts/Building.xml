@@ -95,8 +95,6 @@
 		</if>
 
 		<if test="${ not target::exists('buildOther') }">
-		  	<call target="deployLib" />
-
 			<delete if="${file::exists(product.dir+'\output.log')}"
 				file="${product.dir}\output.log" />
 			<echo>${sln.file}</echo>
@@ -152,6 +150,8 @@
 					<include name="\**\${project.config}\*.dll" />
 				</fileset>
 			</copy>
+			
+		  	<call target="deployLib" />
 		</if>
 
 		<delete if="${file::exists(output.dir+'\PostBuildEvent.bat')}"
