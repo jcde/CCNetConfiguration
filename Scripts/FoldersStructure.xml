@@ -53,12 +53,12 @@
 
 	<xmlpeek property="product.version.major" file="${currentVersion.xml}"  
 		xpath="/product/@major" if="${file::exists(currentVersion.xml)}" />
-	<xmlpeek property="product.version.major" file="${Products.xml}"  
+	<xmlpeek property="product.version.major" file="${Products.xml}" failonerror="false"
 		xpath="/products/product/version[@dir='${xPathProduct.dir}']/@major" if="${not file::exists(currentVersion.xml)}" />
 
 	<xmlpeek property="product.version.minor" file="${currentVersion.xml}"  
 		xpath="/product/@minor" if="${file::exists(currentVersion.xml)}" />
-	<xmlpeek property="product.version.minor" file="${Products.xml}"  
+	<xmlpeek property="product.version.minor" file="${Products.xml}" failonerror="false"
 		xpath="/products/product/version[@dir='${xPathProduct.dir}']/@minor" if="${not file::exists(currentVersion.xml)}" />
 
 	<xmlpeek property="product.version.build" file="${currentVersion.xml}" 
