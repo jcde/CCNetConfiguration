@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <project>
 
-	<!-- properties nugetProject and nugetServer are used -->
+	<!-- properties nugetProject and nugetServer are used, set ${project.config} to "Release" as a rule />
+ -->
 	<target name="nugetPackage" >
 		<exec program="nuget" commandline="spec ${product.dir}\${nugetProject}\${nugetProject}.csproj" />
 		<exec program="nuget" commandline="pack ${product.dir}\${nugetProject}\${nugetProject}.csproj -Exclude Tests\* -Prop Configuration=Release" />
