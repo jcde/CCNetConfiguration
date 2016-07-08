@@ -161,6 +161,16 @@ ${s}" />
 			</exec>
 	</target>
 	
+	<target name="jasmine" >
+		<exec program="cmd" commandline="/c jasmine " workingdir="trunk" failonerror="false"
+			output="testResult" resultproperty="testResult" />
+		
+		<if test="${testResult != '0'}">
+			<loadfile file="testResult" property="testResult" />
+			<fail message="${testResult}" />
+		</if>
+	</target>
+	
 	<target name="fxcop" depends="build" >
 		<mkdir dir="${metrics.dir}\fxcop" />
     <exec program="${environment::get-folder-path('ProgramFiles')}\Microsoft FxCop 1.36\fxcopcmd.exe" 
