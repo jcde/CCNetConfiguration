@@ -40,6 +40,9 @@
 
 	<property name="r" value="${'${proj.dir}'}" />
 	<property name="xPathProduct.dir" value="${string::replace(product.dir, proj.dir, r)}" />
+	<property name="l" value="${'${lib.dir}'}" />
+	<property name="xPathProduct.dir" value="${string::replace(product.dir, lib.dir, l)}" />
+	<echo>xPathProduct.dir = ${xPathProduct.dir}</echo>
 	<if test="${string::to-lower(product.name) == 'product'}" >
 		<!--too complex properties property name="allProducts" dynamic="True" value="" />
 		<xmlpeek property="allProducts" file="${Products.xml}" xpath="/" /-->
