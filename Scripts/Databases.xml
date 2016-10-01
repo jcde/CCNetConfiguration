@@ -172,11 +172,21 @@
 	<property name="backupDir" value="${backup.dir}\${product.name}" />
     <mkdir dir="${backupDir}" />
 	<property name="backupFile" value="${backupDir}\${initialCatalog}_${year+month+day}" />
+
+	<property name="dataSourcePort" value="3306" />
+    <property name="fromIndex" value="${string::index-of(dataSource, ':')}" />
+	<if test="${fromIndex != '-1'}" >
+		<echo>${ string::get-length(dataSource) - int::parse(fromIndex) }</echo>
+		<property name="dataSourcePort" 
+		          value="${string::substring(dataSource, convert::to-int(fromIndex) + 1, string::get-length(dataSource) - int::parse(fromIndex) - 1)}" /> 
+		<property name="dataSource" value="${string::substring(dataSource, 0, fromIndex)}" /> 
+	</if>
     <exec program="mysqlDump.bat" timeout="1800000" basedir="${scripts.dir}" workingdir="${scripts.dir}" > 
               <arg value="${initialCatalog}" />
               <arg value="${gzip.exe}" />
               <arg value="${backupFile}_mysql.zip" />
               <arg value="${dataSource}" />
+              <arg value="${dataSourcePort}" />
               <arg value="${userId}" />
               <arg value="${pass}" />
               <arg value="${zipPassword}" />
@@ -229,13 +239,13 @@
 
   <target name="wikiBackupOnGmail" depends="wikiBackup" >
       <mail
-        from="robot@christian.in.ua"
-        tolist="christorage1@gmail.com"
+        from=""
+        tolist=""
         subject="${product.name}: ${path::get-file-name(backupFile)}"
         mailhost="smtp.gmail.com"
         mailport="587"
         ssl="true"
-        user="yevhen.balun@gmail.com"
+        user=""
         password="testtest123"
       >
         <attachments>
