@@ -9,7 +9,8 @@
 	</if> 
 	<property name="svn.exe" value="svn" /> <!--${environment::get-folder-path('ProgramFiles')}\Subversion\bin\svn.exe" /-->
 
- 	<property name="sources.dir" value="${ path::get-directory-name(path::get-directory-name(path::get-directory-name(string::to-lower(environment::get-variable('currentDeploy'))))) }" />
+ 	<property name="sources.dir" value="${ path::get-directory-name(path::get-directory-name(path::get-directory-name(environment::get-variable('currentDeploy')))) }" />
+	<property name="sources.dir" value="${ string::to-lower(string::substring(sources.dir, 0, 1)) + string::substring(sources.dir, 1, string::get-length(sources.dir)-1 )}" />
 	<property name="autobuilds.dir"  value="${sources.dir}\AutoBuilds" />
 	<property name="config.dir"  value="${autobuilds.dir}\CCNetConfiguration" />
 	<property name="scripts.dir" value="${config.dir}\Scripts" /> 
@@ -42,7 +43,7 @@
 	<property name="xPathProduct.dir" value="${string::replace(product.dir, proj.dir, r)}" />
 	<property name="l" value="${'${lib.dir}'}" />
 	<property name="xPathProduct.dir" value="${string::replace(product.dir, lib.dir, l)}" if="${not string::contains(xPathProduct.dir, r)}" />
-	<echo>xPathProduct.dir = ${xPathProduct.dir}</echo>
+	<echo>xPathProduct.dir: ${xPathProduct.dir}, proj.dir: ${proj.dir}, programs86: ${programs86}</echo>
 	<if test="${string::to-lower(product.name) == 'product'}" >
 		<!--too complex properties property name="allProducts" dynamic="True" value="" />
 		<xmlpeek property="allProducts" file="${Products.xml}" xpath="/" /-->
