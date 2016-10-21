@@ -9,7 +9,7 @@
 	</if> 
 	<property name="svn.exe" value="svn" /> <!--${environment::get-folder-path('ProgramFiles')}\Subversion\bin\svn.exe" /-->
 
- 	<property name="sources.dir" value="${ path::get-directory-name(path::get-directory-name(path::get-directory-name(environment::get-variable('currentDeploy')	))) }" />
+ 	<property name="sources.dir" value="${ path::get-directory-name(path::get-directory-name(path::get-directory-name(string::to-lower(environment::get-variable('currentDeploy'))))) }" />
 	<property name="autobuilds.dir"  value="${sources.dir}\AutoBuilds" />
 	<property name="config.dir"  value="${autobuilds.dir}\CCNetConfiguration" />
 	<property name="scripts.dir" value="${config.dir}\Scripts" /> 
@@ -21,7 +21,7 @@
 
 	<property name="build.file" value="${path::get-file-name( project::get-buildfile-uri() )}" />
 
-	<property name="product.dir" value="${string::replace(path::get-directory-name( project::get-buildfile-uri() ), 'file:\', '') }" />
+	<property name="product.dir" value="${string::replace(path::get-directory-name( project::get-buildfile-uri() ), 'file:\', '')}" />
 	<property name="product.config.dir" value="${product.dir}\Config" />
 	<property name="tags.dir" value="${ string::substring(product.dir, 0, string::last-index-of(product.dir, '\')) }\tags" />
 	<property name="modules.dir" value="${sources.dir}\Modules" />
@@ -41,7 +41,7 @@
 	<property name="r" value="${'${proj.dir}'}" />
 	<property name="xPathProduct.dir" value="${string::replace(product.dir, proj.dir, r)}" />
 	<property name="l" value="${'${lib.dir}'}" />
-	<property name="xPathProduct.dir" value="${string::replace(product.dir, lib.dir, l)}" />
+	<property name="xPathProduct.dir" value="${string::replace(product.dir, lib.dir, l)}" if="${not string::contains(xPathProduct.dir, r)}" />
 	<echo>xPathProduct.dir = ${xPathProduct.dir}</echo>
 	<if test="${string::to-lower(product.name) == 'product'}" >
 		<!--too complex properties property name="allProducts" dynamic="True" value="" />
