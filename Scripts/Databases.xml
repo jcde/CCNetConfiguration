@@ -208,30 +208,29 @@
   </target>
 
   <target name="wikiBackup" >
-      <property name="settingsFile" value="${product.dir}\LocalSettings.php" />
-      <loadfile file="${settingsFile}" property="settings" />
-		  <property name="fromIndex" value="${string::index-of(settings, '$wgDBserver         = ')+23}" />
-      <property name="dataSource" value="${string::substring(settings, fromIndex, 100)}" />
-		  <property name="toIndex" value="${string::index-of(dataSource, ';')-1}" />
-      <property name="dataSource" value="${string::substring(dataSource, 0, toIndex)}" />
+		<property name="settingsFile" value="${product.dir}\LocalSettings.php" />
+		<property name="settingsFile" value="${product.dir}\wiki\LocalSettings.php" 
+							if="${not file::exists(settingsFile)}" />
+		<loadfile file="${settingsFile}" property="settings" />
+		<property name="fromIndex" value="${string::index-of(settings, '$wgDBserver         = ')+23}" />
+		<property name="dataSource" value="${string::substring(settings, fromIndex, 100)}" />
+		<property name="toIndex" value="${string::index-of(dataSource, ';')-1}" />
+		<property name="dataSource" value="${string::substring(dataSource, 0, toIndex)}" />
 
-      <loadfile file="${settingsFile}" property="settings" />
-		  <property name="fromIndex" value="${string::index-of(settings, '$wgDBname           = ')+23}" />
-      <property name="initialCatalog" value="${string::substring(settings, fromIndex, 100)}" />
-		  <property name="toIndex" value="${string::index-of(initialCatalog, ';')-1}" />
-      <property name="initialCatalog" value="${string::substring(initialCatalog, 0, toIndex)}" />
+		<property name="fromIndex" value="${string::index-of(settings, '$wgDBname           = ')+23}" />
+		<property name="initialCatalog" value="${string::substring(settings, fromIndex, 100)}" />
+		<property name="toIndex" value="${string::index-of(initialCatalog, ';')-1}" />
+		<property name="initialCatalog" value="${string::substring(initialCatalog, 0, toIndex)}" />
 
-      <loadfile file="${settingsFile}" property="settings" />
-		  <property name="fromIndex" value="${string::index-of(settings, '$wgDBuser           = ')+23}" />
-      <property name="userId" value="${string::substring(settings, fromIndex, 100)}" />
-		  <property name="toIndex" value="${string::index-of(userId, ';')-1}" />
-      <property name="userId" value="${string::substring(userId, 0, toIndex)}" />
+		<property name="fromIndex" value="${string::index-of(settings, '$wgDBuser           = ')+23}" />
+		<property name="userId" value="${string::substring(settings, fromIndex, 100)}" />
+		<property name="toIndex" value="${string::index-of(userId, ';')-1}" />
+		<property name="userId" value="${string::substring(userId, 0, toIndex)}" />
 
-      <loadfile file="${settingsFile}" property="settings" />
-		  <property name="fromIndex" value="${string::index-of(settings, '$wgDBpassword       = ')+23}" />
-      <property name="pass" value="${string::substring(settings, fromIndex, 100)}" />
-		  <property name="toIndex" value="${string::index-of(pass, ';')-1}" />
-      <property name="pass" value="${string::substring(pass, 0, toIndex)}" />
+		<property name="fromIndex" value="${string::index-of(settings, '$wgDBpassword       = ')+23}" />
+		<property name="pass" value="${string::substring(settings, fromIndex, 100)}" />
+		<property name="toIndex" value="${string::index-of(pass, ';')-1}" />
+		<property name="pass" value="${string::substring(pass, 0, toIndex)}" />
 	  
 	  <call target="mysqlBackup" />
   </target>
