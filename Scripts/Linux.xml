@@ -2,8 +2,9 @@
 <project>
 	<target name="winscp" >
 		<property name="remote.dir" value="${string::replace(string::replace(product.dir, sources.dir, ''), '\', '/')}" />
+		<echo>remote.dir: ${remote.dir}</echo>
 		<exec program="${environment::get-variable('ProgramFiles(x86)')}\winscp\winscp.com" timeout="1800000" > <!-- .com file writes correct console -->
-			<arg value='/command "open ogo" "synchronize remote ""${product.dir}"" ""${remote.dir}"" -filemask=""|.svn/;""" exit' />
+			<arg value='/command "open ogo" "synchronize remote ""${product.dir}"" ""${remote.dir}"" -filemask=""|.svn/;*.build""" exit' />
 		</exec>
 	</target>
 </project>
