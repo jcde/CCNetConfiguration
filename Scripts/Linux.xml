@@ -1,22 +1,28 @@
 <?xml version="1.0"?>
 <project>
-	<target name="winscp" >
+	<target name="winscp.init" >
 		<property name="remote.dir" value="${string::replace(string::replace(product.dir, sources.dir, ''), '\', '/')}" />
 		<echo>remote.dir: ${remote.dir}</echo>
-		<property name="winscp" value="${environment::get-variable('ProgramFiles(x86)')}\winscp\winscp.com" /> <!-- .com file writes correct console -->
-    
-		<property name="backupImages.dir" value="${backup.dir}\${product.name}\images" />
-		<mkdir dir="${backupImages.dir}" />
 
+		<property name="winscp" value="${environment::get-variable('ProgramFiles(x86)')}\winscp\winscp.com" /> <!-- .com file writes correct console -->
+		<property name="winscp.sync" value='"synchronize remote ""${product.dir}"" ""${remote.dir}"" -filemask=""|.svn/;*.build"""' />
+	</target>
+	
+	<target name="winscp" depends="winscp.init" >
 		<exec program="${winscp}" timeout="1800000" > 
 			<arg value='${sshHost}' />
 			<!--arg value='/hostkey=' /-->
-			<arg value='/command "synchronize remote ""${product.dir}"" ""${remote.dir}"" -filemask=""|.svn/;*.build""" "synchronize local ""${backupImages.dir}"" ""${remote.dir}/images"" " exit' />
+			<arg value='/command ${winscp.sync} exit' />
 		</exec>
-
 	</target>
 	
-  <target name="winscpAndBackup" depends="winscp" >
+  <target name="winscpAndBackup" depends="winscp.init" >
+		<property name="backupImages.dir" value="${backup.dir}\${product.name}\images" />
+		<mkdir dir="${backupImages.dir}" />
+
+		<property name="winscp.sync" value='${winscp.sync} "synchronize local ""${backupImages.dir}"" ""${remote.dir}/images"""' />
+		<call target="winscp" />
+
 		<call target="wikiBackup" />
 	</target>
 </project>
