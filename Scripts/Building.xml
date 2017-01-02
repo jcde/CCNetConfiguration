@@ -111,7 +111,7 @@
 				<fail message="${outputlog}" />
 			</if-->
 			
-			<property name="project.platform" value="Any CPU" if="${path::get-extension(sln.file) = '.sln'}" /> 
+			<property name="project.platform" value="Any CPU" if="${path::get-extension(sln.file) == '.sln'}" /> 
 			<property name="project.platform" value="AnyCPU" if="${path::get-extension(sln.file) != '.sln'}" /> 
 			<msbuild project="${sln.file}" >
 				<property name="Configuration" value="${project.config}" />
