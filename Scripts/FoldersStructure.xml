@@ -23,6 +23,7 @@
 	<property name="build.file" value="${path::get-file-name( project::get-buildfile-uri() )}" />
 
 	<property name="product.dir" value="${string::replace(path::get-directory-name( project::get-buildfile-uri() ), 'file:\', '')}" />
+	<property name="product.dir" value="${ string::to-lower(string::substring(product.dir, 0, 1)) + string::substring(product.dir, 1, string::get-length(product.dir)-1 )}" />
 	<property name="product.config.dir" value="${product.dir}\Config" />
 	<property name="tags.dir" value="${ string::substring(product.dir, 0, string::last-index-of(product.dir, '\')) }\tags" />
 	<property name="modules.dir" value="${sources.dir}\Modules" />
@@ -43,13 +44,13 @@
 	<property name="xPathProduct.dir" value="${string::replace(product.dir, proj.dir, r)}" />
 	<property name="l" value="${'${lib.dir}'}" />
 	<property name="xPathProduct.dir" value="${string::replace(product.dir, lib.dir, l)}" if="${not string::contains(xPathProduct.dir, r)}" />
-	<echo>xPathProduct.dir: ${xPathProduct.dir}, proj.dir: ${proj.dir}, programs86: ${programs86}</echo>
 	<if test="${string::to-lower(product.name) == 'product'}" >
 		<!--too complex properties property name="allProducts" dynamic="True" value="" />
 		<xmlpeek property="allProducts" file="${Products.xml}" xpath="/" /-->
 		<xmlpeek property="product.name" file="${Products.xml}" failonerror="false"
 				 xpath="/products/product[version/@dir='${xPathProduct.dir}']/@name" />
 	</if>
+	<echo>xPathProduct.dir: ${xPathProduct.dir}, product.name: ${product.name}, proj.dir: ${proj.dir}, programs86: ${programs86}</echo>
 	<xmlpeek property="product.name" if="${file::exists(currentVersion.xml)}" 
 			 file="${currentVersion.xml}" xpath="/product/@name" />
 
