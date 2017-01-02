@@ -125,6 +125,9 @@
 	<if test="${file::exists(product.dir + '\' + product.name +'.sln')}" >
 		<property name="sln.file" value="${product.name}.sln" />
 	</if>
+	<if test="${file::exists(product.dir + '\' + product.name +'.csproj')}" >
+		<property name="sln.file" value="${product.name}.csproj" />
+	</if>
 	<echo>was sln ${sln.file} for product ${product.name}</echo>
 		<property name="pnl" value="${string::get-length(product.name) + 1}" />
 		<property name="slnIndex" value="${string::index-of(build.file, '.sln')}" />

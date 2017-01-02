@@ -14,7 +14,7 @@
 	<property name="deployedProduct.name" value="${product.name}" />
 	<!-- input properties 'prodLib.dir' -->
 	<target name="deployLibHot" >
- 		<copy todir="${product.dir}" overwrite="true" >
+ 		<copy todir="${output.dir}" overwrite="true" >
  			<fileset basedir="${prodLib.dir}\${project.config}" >
 				<include name="**/*" />
 			</fileset>
@@ -97,8 +97,9 @@
 		<if test="${ not target::exists('buildOther') }">
 			<delete if="${file::exists(product.dir+'\output.log')}"
 				file="${product.dir}\output.log" />
-			<echo>${sln.file}</echo>
- 			<exec commandline='restore "${sln.file}"' program="nuget" />
+			<echo>${sln.file} ${project.config}</echo>
+
+ 			<exec commandline='restore "${sln.file}"' program="nuget" failonerror="false" />
 			<property name="res" value="0" />
       <!-- rem MSBuild does not support vbproj files >
       <exec program="${scripts.dir}\build.bat" commandline="${project.config} &quot;${sln.file}&quot;" workingdir="${build.dir}"
@@ -109,9 +110,11 @@
 				<loadfile file="output.log" property="outputlog" />
 				<fail message="${outputlog}" />
 			</if-->
+			
+
 			<msbuild project="${sln.file}" >
 				<property name="Configuration" value="${project.config}" />
-				<property name="Platform" value="Any CPU" />
+				<property name="Platform" value="AnyCPU" /> <!-- or 'Any CPU' ?-->
 				<property name="VisualStudioVersion" value="10.0" />
 			</msbuild>
 			<if test="${project.config != productset.name}" >
