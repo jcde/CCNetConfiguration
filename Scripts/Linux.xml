@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project>
-	<target name="winscp.init" >
+	<target name="winscp.init" unless="${target::has-executed('winscp.init')}">
 		<property name="remote.dir" value="${string::replace(string::replace(product.dir, sources.dir, ''), '\', '/')}" />
 		<echo>remote.dir: ${remote.dir}</echo>
 
