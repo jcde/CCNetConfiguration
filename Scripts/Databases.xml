@@ -200,7 +200,7 @@
 			<items refid="thelogs" />
 		</in>
 		<do>
-			<if test="${timespan::get-days(datetime::now() - file::get-last-write-time(filename)) >= 17}">
+			<if test="${timespan::get-days(datetime::now() - file::get-last-write-time(filename)) >= 30}">
 				<delete file="${filename}" />
 			</if>
 		</do>
