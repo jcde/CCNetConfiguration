@@ -2,10 +2,11 @@
 <project>
 	<target name="winscp.init" unless="${target::has-executed('winscp.init')}">
 		<property name="remote.dir" value="${string::replace(string::replace(product.dir, sources.dir, ''), '\', '/')}" />
+		<property name="local.dir" value="${product.dir}" />
 		<echo>remote.dir: ${remote.dir}</echo>
 
 		<property name="winscp" value="${environment::get-variable('ProgramFiles(x86)')}\winscp\winscp.com" /> <!-- .com file writes correct console -->
-		<property name="winscp.sync" value='"synchronize remote ""${product.dir}"" ""${remote.dir}"" -filemask=""|.svn/;*.build"""' />
+		<property name="winscp.sync" value='"synchronize remote ""${local.dir}"" ""${remote.dir}"" -filemask=""|.svn/;*.build"""' />
 	</target>
 	
 	<target name="winscp" depends="winscp.init" >
