@@ -1,16 +1,17 @@
 <?xml version="1.0"?>
 <project>
 	<target name="winscp.init" unless="${target::has-executed('winscp.init')}">
-		<property name="remote.dir" value="${string::replace(product.dir, sources.dir, '')}" />
-		<property name="linux.remote.dir" value="${string::replace(remote.dir, '\', '/')}" />
-		<property name="linux.local.dir" value="${product.dir}" />
-		<echo>remote.dir: ${remote.dir}</echo>
+		<property name="remote.dir" value="${string::replace(product.dir, sources.dir, '')}" 
+					if="${not property::exists('remote.dir')}"/>
+		<property name="linux.local.dir" value="${product.dir}" if="${not property::exists('linux.local.dir')}" />
 
 		<property name="winscp" value="${environment::get-variable('ProgramFiles(x86)')}\winscp\winscp.com" /> <!-- .com file writes correct console -->
-		<property name="winscp.sync" value='"synchronize remote ""${linux.local.dir}"" ""${linux.remote.dir}"" -filemask=""|.svn/;*.build"""' />
 	</target>
 	
 	<target name="winscp" depends="winscp.init" >
+		<property name="linux.remote.dir" value="${string::replace(remote.dir, '\', '/')}" />
+		<property name="winscp.sync" value='"synchronize remote ""${linux.local.dir}"" ""${linux.remote.dir}"" -filemask=""|.svn/;*.build"""' />
+		<echo>remote: ${linux.remote.dir}, local: ${linux.local.dir}</echo>
 		<exec program="${winscp}" timeout="1800000" > 
 			<arg value='${sshHost}' />
 			<arg value='/hostkey="${sshKey}"' /> <!-- may be cached by WinSCP.exe in "%Program Files (x86)%\WinSCP\WinSCP.ini" -->
