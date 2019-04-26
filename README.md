@@ -7,7 +7,7 @@ File ${autobuilds.dir}/Products.xml describes projects structure in comparison t
 Note. The product "Building" lists all envirounments and workstations that belong to.
 
 = Prerequisites =
-* [https://github.com/jcde/NAntWithContrib Nant 0.92]
+* [https://github.com/jcde/NAntWithContrib Nant 0.92.1]
 * TortoiseSVN with "command line client tools" installed
 * CruiseControl.NET-1.8.5.0-Setup.exe may install web dashboard
 * http://switch.dl.sourceforge.net/project/gnuwin32/zip/3.0/zip-3.0-setup.exe for zipping
@@ -29,3 +29,6 @@ Note. The product "Building" lists all envirounments and workstations that belon
 = TFS notes =
 * Used CC_NET workspace by default.
 * Working folder may be mapped to only one workspace and such mapping is done in Visual Studio or first time by cruisecontrol. 
+
+
+http://skills.gq/aw/Category:CCNetConfiguration
