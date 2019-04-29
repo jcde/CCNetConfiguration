@@ -1,7 +1,7 @@
 # CCNetConfiguration
 Set of NAnt scripts to produce CruiseControl.Net configuration files
 
-Includes CruiseControl.Net 1.8.5 binaries.
+Gets CruiseControl.Net 1.8.5 and other binaries from https://github.com/jcde/CCNetConfigurationAddons.
 
 File ${autobuilds.dir}/Products.xml describes projects structure in comparison to products and workstations.
 Note. The product "Building" lists all envirounments and workstations that belong to.
