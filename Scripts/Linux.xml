@@ -6,7 +6,7 @@
 					if="${not property::exists('remote.dir')}"/>
 		<property name="linux.local.dir" value="${product.dir}" if="${not property::exists('linux.local.dir')}" />
 
-		<property name="winscp" value="${environment::get-variable('ProgramFiles(x86)')}\winscp\winscp.com" /> <!-- .com file writes correct console -->
+		<property name="winscp" value="${programs86}\winscp\winscp.com" /> <!-- .com file writes correct console -->
 
 		<property name="linux.remote.dir" value="${string::replace(remote.dir, '\', '/')}" />
 		<property name="winscp.sync" value='"synchronize ${direction} ""${linux.local.dir}"" ""${linux.remote.dir}"" -filemask=""|.svn/;*.build"""' />
