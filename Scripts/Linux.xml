@@ -63,7 +63,7 @@ value='${winscp.sync} "synchronize local ""${backupImages.dir}"" ""${linux.remot
 	  
 	  <!--call target="mysqlBackup" /-->
 		<property name="winscp.sync" 
-value='${winscp.sync} "rm ${linux.remote.dir}/images/db*.zip" "call mysqldump ${initialCatalog} -h ${dataSource} -P ${dataSourcePort} --routines -u ${userId} -p${pass} --default-character-set=utf8 --single-transaction --quick | zip ${linux.remote.dir}/images/db${year+month+day}.zip -" ' />
+value='${winscp.sync} "rm ${linux.remote.dir}/images/db*.zip" "call mysqldump --defaults-extra-file=/Projects/wiki/family/db.cnf ${initialCatalog} -P ${dataSourcePort} --routines --default-character-set=utf8 --single-transaction --quick | gzip > ${linux.remote.dir}/images/db${year+month+day}.zip" ' />
   </target>
 
   <target name="wikiBackupOnGmail" depends="wikiBackup" >
