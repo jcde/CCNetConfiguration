@@ -1,34 +1,96 @@
 <?xml version="1.0"?>
 <project>
-	<target name="winscp.init">  <!-- unless="${target::has-executed('winscp.init')}"> -->
+	<!-- mark "winscp.sync" as readonly if needed -->     
+	<target name="winscp.init" unless="${target::has-executed('winscp.init')}"> -->
 		<property name="direction" value="remote" />
 		<property name="remote.dir" value="${string::replace(product.dir, sources.dir, '')}" 
 					if="${not property::exists('remote.dir')}"/>
 		<property name="linux.local.dir" value="${product.dir}" if="${not property::exists('linux.local.dir')}" />
+		<property name="linux.remote.dir" value="${string::replace(remote.dir, '\', '/')}" />
+
+		<property name="winscp.sync" value='"synchronize ${direction} ""${linux.local.dir}"" ""${linux.remote.dir}"" -filemask=""|.svn/;*.build"""' />
 
 		<property name="winscp" value="${programs86}\winscp\winscp.com" /> <!-- .com file writes correct console -->
-
-		<property name="linux.remote.dir" value="${string::replace(remote.dir, '\', '/')}" />
-		<property name="winscp.sync" value='"synchronize ${direction} ""${linux.local.dir}"" ""${linux.remote.dir}"" -filemask=""|.svn/;*.build"""' />
-	</target>
+		</target>
 	
-	<!-- parameters: "direction" -->     
+	<!-- parameters: "direction" -->
 	<target name="winscp" depends="winscp.init" >
 		<echo>remote: ${linux.remote.dir}, local: ${linux.local.dir}</echo>
+		<echo>${winscp.sync}</echo>
 		<exec program="${winscp}" timeout="1800000" > 
 			<arg value='${sshHost}' />
 			<arg value='/hostkey="${sshKey}"' /> <!-- may be cached by WinSCP.exe in "%Program Files (x86)%\WinSCP\WinSCP.ini" -->
 			<arg value='/command ${winscp.sync} exit' />
 		</exec>
 	</target>
+
 	
   <target name="winscpAndBackup" depends="winscp.init" >
+		<call target="wikiBackup" />
+
 		<property name="backupImages.dir" value="${backup.dir}\${product.name}\images" />
 		<mkdir dir="${backupImages.dir}" />
 
-		<property name="winscp.sync" value='${winscp.sync} "synchronize local ""${backupImages.dir}"" ""${linux.remote.dir}/images"""' />
+		<property name="winscp.sync" readonly="true"
+value='${winscp.sync} "synchronize local ""${backupImages.dir}"" ""${linux.remote.dir}/images"""' />
 		<call target="winscp" />
-
-		<call target="wikiBackup" />
 	</target>
+
+	<target name="wikiBackup" >
+		<property name="settingsFile" value="${product.dir}\LocalSettings.php" />
+		<property name="settingsFile" value="${product.dir}\wiki\LocalSettings.php" 
+							if="${not file::exists(settingsFile)}" />
+		<loadfile file="${settingsFile}" property="settings" />
+		<property name="fromIndex" value="${string::index-of(settings, '$wgDBserver         = ')+23}" />
+		<property name="dataSource" value="${string::substring(settings, fromIndex, 100)}" />
+		<property name="toIndex" value="${string::index-of(dataSource, ';')-1}" />
+		<property name="dataSource" value="${string::substring(dataSource, 0, toIndex)}" failonerror="False" />
+
+		<property name="fromIndex" value="${string::index-of(settings, '$wgDBname           = ')+23}" />
+		<property name="initialCatalog" value="${string::substring(settings, fromIndex, 100)}" />
+		<property name="toIndex" value="${string::index-of(initialCatalog, ';')-1}" />
+		<property name="initialCatalog" value="${string::substring(initialCatalog, 0, toIndex)}" />
+
+		<property name="fromIndex" value="${string::index-of(settings, '$wgDBuser           = ')+23}" />
+		<property name="userId" value="${string::substring(settings, fromIndex, 100)}" />
+		<property name="toIndex" value="${string::index-of(userId, ';')-1}" />
+		<property name="userId" value="${string::substring(userId, 0, toIndex)}" failonerror="False" />
+
+		<property name="fromIndex" value="${string::index-of(settings, '$wgDBpassword       = ')+23}" />
+		<property name="pass" value="${string::substring(settings, fromIndex, 100)}" />
+		<property name="toIndex" value="${string::index-of(pass, ';')-1}" />
+		<property name="pass" value="${string::substring(pass, 0, toIndex)}" failonerror="False" />
+	  
+	  <!--call target="mysqlBackup" /-->
+		<property name="winscp.sync" 
+value='${winscp.sync} "rm ${linux.remote.dir}/images/db*.zip" "call mysqldump ${initialCatalog} -h ${dataSource} -P ${dataSourcePort} --routines -u ${userId} -p${pass} --default-character-set=utf8 --single-transaction --quick | zip ${linux.remote.dir}/images/db${year+month+day}.zip -" ' />
+  </target>
+
+  <target name="wikiBackupOnGmail" depends="wikiBackup" >
+      <mail
+        from=""
+        tolist=""
+        subject="${product.name}: ${path::get-file-name(backupFile)}"
+        mailhost="smtp.gmail.com"
+        mailport="587"
+        ssl="true"
+        user=""
+        password="testtest123"
+      >
+        <attachments>
+          <include name="${backupFile}_mysql.zip" />
+        </attachments>
+      </mail>
+      <!-- email was sent anynch delete file="${backupFile}_mysql.zip" /-->
+  </target>
+
+  <target name="wikiBackupWithImages" depends="wikiBackup" >
+      <!-- target name="mysqlBackup" set <property name="backupFile" -->
+      <property name="imagesDir" value="${product.dir}\images" />
+      <zip zipfile="${backupFile}_images.zip" stampdatetime="${datetime::now()}" >
+        <fileset basedir="${imagesDir}" >
+          <include name="**" />
+        </fileset>
+      </zip>
+  </target>
 </project>

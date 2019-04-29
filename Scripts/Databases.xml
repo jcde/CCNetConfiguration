@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <project>
   <!-- put property name="zipPassword" value="" / into currentDeploy.xml -->
+	<property name="dataSourcePort" value="3306" />
 
   <target name="dbInit" depends="installinit" >
     <property name="dbs.dir" value="${product.config.dir}\Databases" />
@@ -169,18 +170,17 @@
   </target>
 
   <target name="mysqlBackup" >
-	<property name="backupDir" value="${backup.dir}\${product.name}" />
-    <mkdir dir="${backupDir}" />
-	<property name="backupFile" value="${backupDir}\${initialCatalog}_${year+month+day}" />
+		<property name="backupDir" value="${backup.dir}\${product.name}" />
+			<mkdir dir="${backupDir}" />
+		<property name="backupFile" value="${backupDir}\${initialCatalog}_${year+month+day}" />
 
-	<property name="dataSourcePort" value="3306" />
     <property name="fromIndex" value="${string::index-of(dataSource, ':')}" />
-	<if test="${fromIndex != '-1'}" >
-		<echo>${ string::get-length(dataSource) - int::parse(fromIndex) }</echo>
-		<property name="dataSourcePort" 
-		          value="${string::substring(dataSource, convert::to-int(fromIndex) + 1, string::get-length(dataSource) - int::parse(fromIndex) - 1)}" /> 
-		<property name="dataSource" value="${string::substring(dataSource, 0, fromIndex)}" /> 
-	</if>
+		<if test="${fromIndex != '-1'}" >
+			<echo>${ string::get-length(dataSource) - int::parse(fromIndex) }</echo>
+			<property name="dataSourcePort" 
+								value="${string::substring(dataSource, convert::to-int(fromIndex) + 1, string::get-length(dataSource) - int::parse(fromIndex) - 1)}" /> 
+			<property name="dataSource" value="${string::substring(dataSource, 0, fromIndex)}" /> 
+		</if>
     <exec program="mysqlDump.bat" timeout="1800000" basedir="${scripts.dir}" workingdir="${scripts.dir}" > 
               <arg value="${initialCatalog}" />
               <arg value="${gzip.exe}" />
@@ -207,92 +207,32 @@
 	</foreach>
   </target>
 
-  <target name="wikiBackup" >
-		<property name="settingsFile" value="${product.dir}\LocalSettings.php" />
-		<property name="settingsFile" value="${product.dir}\wiki\LocalSettings.php" 
-							if="${not file::exists(settingsFile)}" />
-		<loadfile file="${settingsFile}" property="settings" />
-		<property name="fromIndex" value="${string::index-of(settings, '$wgDBserver         = ')+23}" />
-		<property name="dataSource" value="${string::substring(settings, fromIndex, 100)}" />
-		<property name="toIndex" value="${string::index-of(dataSource, ';')-1}" />
-		<property name="dataSource" value="${string::substring(dataSource, 0, toIndex)}" failonerror="False" />
-
-		<property name="fromIndex" value="${string::index-of(settings, '$wgDBname           = ')+23}" />
-		<property name="initialCatalog" value="${string::substring(settings, fromIndex, 100)}" />
-		<property name="toIndex" value="${string::index-of(initialCatalog, ';')-1}" />
-		<property name="initialCatalog" value="${string::substring(initialCatalog, 0, toIndex)}" />
-
-		<property name="fromIndex" value="${string::index-of(settings, '$wgDBuser           = ')+23}" />
-		<property name="userId" value="${string::substring(settings, fromIndex, 100)}" />
-		<property name="toIndex" value="${string::index-of(userId, ';')-1}" />
-		<property name="userId" value="${string::substring(userId, 0, toIndex)}" failonerror="False" />
-
-		<property name="fromIndex" value="${string::index-of(settings, '$wgDBpassword       = ')+23}" />
-		<property name="pass" value="${string::substring(settings, fromIndex, 100)}" />
-		<property name="toIndex" value="${string::index-of(pass, ';')-1}" />
-		<property name="pass" value="${string::substring(pass, 0, toIndex)}" failonerror="False" />
-	  
-	  <call target="mysqlBackup" />
-  </target>
-
-
-  <target name="wikiBackupOnGmail" depends="wikiBackup" >
-      <mail
-        from=""
-        tolist=""
-        subject="${product.name}: ${path::get-file-name(backupFile)}"
-        mailhost="smtp.gmail.com"
-        mailport="587"
-        ssl="true"
-        user=""
-        password="testtest123"
-      >
-        <attachments>
-          <include name="${backupFile}_mysql.zip" />
-        </attachments>
-      </mail>
-      <!-- email was sent anynch delete file="${backupFile}_mysql.zip" /-->
-  </target>
-
-  <target name="wikiBackupWithImages" depends="wikiBackup" >
-      <!-- target name="mysqlBackup" set <property name="backupFile" -->
-      <property name="imagesDir" value="${product.dir}\images" />
-      <zip zipfile="${backupFile}_images.zip" stampdatetime="${datetime::now()}" >
-        <fileset basedir="${imagesDir}" >
-          <include name="**" />
-        </fileset>
-      </zip>
-  </target>
-
   <!-- input properties 'prName' -->
   <!-- output properties 'connstr', 'datype' -->
   <target name="connstrIntoOLEDB" depends="dbInit" >
 
-      <xmlpeek file="${web.config}" xpath="/configuration/appSettings/add[@key='${prName}DAType']/@value"
-      property="datype" failonerror="False" if="${not(property::exists('datype'))}" />
+		<xmlpeek file="${web.config}" xpath="/configuration/appSettings/add[@key='${prName}DAType']/@value"
+		property="datype" failonerror="False" if="${not(property::exists('datype'))}" />
 
-      <xmlpeek file="${web.config}" 
-      xpath="/configuration/applicationSettings/NumSite.DAL.Properties.Settings/setting[@name='${prName}DAType']/value"
-      property="datype" failonerror="False" if="${not(property::exists('datype'))}" />
-    
-      <trycatch>
-        <try>
-              <xmlpeek file="${web.config}" xpath="/configuration/appSettings/add[@key='${prName}ConnStr${datype}']/@value"
-              property="connstr" />
-        </try>
-        <catch>
-          <xmlpeek file="${web.config}" property="datype" if="${not(property::exists('datype'))}"
-                   xpath="/configuration/connectionStrings/add[contains(@name, '${prName}ConnStr')][@providerName!='']/@providerName" />
-          <property name="datype" value="Sql" if="${datype=='System.Data.SqlClient'}" />
-          <xmlpeek file="${web.config}" property="connstr" failonerror="False"
-                   xpath="/configuration/connectionStrings/add[contains(@name, '${prName}ConnStr${datype}')]/@connectionString" />
-          <xmlpeek file="${web.config}" property="connstr" if="${not(property::exists('connstr'))}"
-                   xpath="/configuration/connectionStrings/add[contains(@name, '${prName}ConnStr')]/@connectionString" />
-        </catch>
-      </trycatch>
-      
-
-
+		<xmlpeek file="${web.config}" 
+		xpath="/configuration/applicationSettings/NumSite.DAL.Properties.Settings/setting[@name='${prName}DAType']/value"
+		property="datype" failonerror="False" if="${not(property::exists('datype'))}" />
+	
+		<trycatch>
+			<try>
+						<xmlpeek file="${web.config}" xpath="/configuration/appSettings/add[@key='${prName}ConnStr${datype}']/@value"
+						property="connstr" />
+			</try>
+			<catch>
+				<xmlpeek file="${web.config}" property="datype" if="${not(property::exists('datype'))}"
+								 xpath="/configuration/connectionStrings/add[contains(@name, '${prName}ConnStr')][@providerName!='']/@providerName" />
+				<property name="datype" value="Sql" if="${datype=='System.Data.SqlClient'}" />
+				<xmlpeek file="${web.config}" property="connstr" failonerror="False"
+								 xpath="/configuration/connectionStrings/add[contains(@name, '${prName}ConnStr${datype}')]/@connectionString" />
+				<xmlpeek file="${web.config}" property="connstr" if="${not(property::exists('connstr'))}"
+								 xpath="/configuration/connectionStrings/add[contains(@name, '${prName}ConnStr')]/@connectionString" />
+			</catch>
+		</trycatch>
 
     <property name="pass" value="" />
     <property name="dataSource" value="" />     <!-- may be null for File  -->
