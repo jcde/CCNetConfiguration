@@ -7,6 +7,7 @@
 	<if test="${environment::get-variable('PROCESSOR_ARCHITECTURE')!='x86'}" >
 		<property name="programs86" value="${environment::get-variable('ProgramFiles(x86)')}" />
 	</if> 
+	<property name="nant.location" value="${programs86}/nant/bin/nant.exe" />
 	<property name="svn.exe" value="svn" /> <!--${environment::get-folder-path('ProgramFiles')}\Subversion\bin\svn.exe" /-->
 
  	<property name="sources.dir" value="${ path::get-directory-name(path::get-directory-name(path::get-directory-name(environment::get-variable('currentDeploy')))) }" />
