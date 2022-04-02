@@ -3,12 +3,13 @@
 	<!-- mark "winscp.sync" as readonly if needed -->     
 	<target name="winscp.init" unless="${target::has-executed('winscp.init')}"> -->
 		<property name="direction" value="remote" />
+		<property name="filemask" value="" />
 		<property name="remote.dir" value="${string::replace(product.dir, sources.dir, '')}" 
 					if="${not property::exists('remote.dir')}"/>
 		<property name="linux.local.dir" value="${product.dir}" if="${not property::exists('linux.local.dir')}" />
 		<property name="linux.remote.dir" value="${string::replace(remote.dir, '\', '/')}" />
 
-		<property name="winscp.sync" value='"synchronize ${direction} ""${linux.local.dir}"" ""${linux.remote.dir}"" -filemask=""|.svn/;*.build"""' />
+		<property name="winscp.sync" value='"synchronize ${direction} ""${linux.local.dir}"" ""${linux.remote.dir}"" -filemask=""${filemask}|.svn/;*.build"""' />
 
 		<property name="winscp" value="${programs86}\winscp\winscp.com" /> <!-- .com file writes correct console -->
 		</target>
